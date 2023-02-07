@@ -1,63 +1,63 @@
 // SelectDialogue.cpp : implementation file
-//
 
 #include "stdafx.h"
 #include "SelectDialogue.h"
 
-// SelectDialogue dialog
-
 IMPLEMENT_DYNAMIC(SelectDialogue, CDialogEx)
 
-//Message map.  Just like MFCMAIN.cpp.  This is where we catch button presses etc and point them to a handy dandy method.
+//Message map - just like MFCMAIN.cpp
+//This is where we catch button presses etc and point them to a handy dandy method.
 BEGIN_MESSAGE_MAP(SelectDialogue, CDialogEx)
-	ON_COMMAND(IDOK, &SelectDialogue::End)					//ok button
+	ON_COMMAND(IDOK, &SelectDialogue::End)					//OK button
 	ON_BN_CLICKED(IDOK, &SelectDialogue::OnBnClickedOk)		
-	ON_LBN_SELCHANGE(IDC_LIST1, &SelectDialogue::Select)	//listbox
+	ON_LBN_SELCHANGE(IDC_LIST1, &SelectDialogue::Select)	//Listbox
 END_MESSAGE_MAP()
 
-
-SelectDialogue::SelectDialogue(CWnd* pParent, std::vector<SceneObject>* SceneGraph)		//constructor used in modal
+//Constructor used in modal
+SelectDialogue::SelectDialogue(CWnd* pParent, std::vector<SceneObject>* SceneGraph)
 	: CDialogEx(IDD_DIALOG1, pParent)
 {
 	m_sceneGraph = SceneGraph;
-}
+}//End modal constructor
 
-SelectDialogue::SelectDialogue(CWnd * pParent)			//constructor used in modeless
+//Constructor used in modeless
+SelectDialogue::SelectDialogue(CWnd * pParent)			
 	: CDialogEx(IDD_DIALOG1, pParent)
 {
-}
+}//End modeless constructor
 
 SelectDialogue::~SelectDialogue()
 {
-}
+}//End destructor
 
-///pass through pointers to the data in the tool we want to manipulate
+//Pass through pointers to the data in the tool we want to manipulate
 void SelectDialogue::SetObjectData(std::vector<SceneObject>* SceneGraph, int * selection)
 {
 	m_sceneGraph = SceneGraph;
 	m_currentSelection = selection;
 
-	//roll through all the objects in the scene graph and put an entry for each in the listbox
 	int numSceneObjects = m_sceneGraph->size();
+	//Iterate through all the objects in the scene graph and put an entry for each in the listbox
 	for (int i = 0; i < numSceneObjects; i++)
 	{
-		//easily possible to make the data string presented more complex. showing other columns.
+		//Easily possible to make the data string presented more complex, showing other columns
 		std::wstring listBoxEntry = std::to_wstring(m_sceneGraph->at(i).ID);
 		m_listBox.AddString(listBoxEntry.c_str());
-	}
-}
-
+	}//End for
+}//End SetObjectData
 
 void SelectDialogue::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_listBox);
-}
+}//End DoDataExchange
 
 void SelectDialogue::End()
 {
-	DestroyWindow();	//destory the window properly.  INcluding the links and pointers created.  THis is so the dialogue can start again. 
-}
+	//Destroy the window properly, including the links and pointers created
+	//This is so the dialogue can start again
+	DestroyWindow();
+}//End End
 
 void SelectDialogue::Select()
 {
@@ -67,36 +67,33 @@ void SelectDialogue::Select()
 	m_listBox.GetText(index, currentSelectionValue);
 
 	*m_currentSelection = _ttoi(currentSelectionValue);
-
-}
+}//End Select
 
 BOOL SelectDialogue::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
-	//uncomment for modal only
-/*	//roll through all the objects in the scene graph and put an entry for each in the listbox
+	//Uncomment for modal only
+	/*//roll through all the objects in the scene graph and put an entry for each in the listbox
 	int numSceneObjects = m_sceneGraph->size();
 	for (size_t i = 0; i < numSceneObjects; i++)
 	{
-		//easily possible to make the data string presented more complex. showing other columns.
+		//Easily possible to make the data string presented more complex, showing other columns
 		std::wstring listBoxEntry = std::to_wstring(m_sceneGraph->at(i).ID);
 		m_listBox.AddString(listBoxEntry.c_str());
 	}*/
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
+	return TRUE;  //Return true, unless you set the focus to a control
+				  //EXCEPTION: OCX Property Pages should return FALSE
+}//End OnInitDialogue
 
 void SelectDialogue::PostNcDestroy()
 {
-}
+}//End PostNcDestroy
 
+//SelectDialogue message handlers callback
+//We only need this if the dailogue is being set up with createDialogue()
+//We are doing it manually, so it's better to use the messagemap
 
-
-
-// SelectDialogue message handlers callback   - We only need this if the dailogue is being setup-with createDialogue().  We are doing
-//it manually so its better to use the messagemap
 /*INT_PTR CALLBACK SelectProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {	
 	switch (uMsg)
@@ -114,16 +111,14 @@ void SelectDialogue::PostNcDestroy()
 			EndDialog(hwndDlg, wParam);
 			return TRUE;
 			break;
-		}
-	}
+		}//End switch
+	}//End switch
 	
 	return INT_PTR();
-}*/
-
+}//End SelectProc*/
 
 void SelectDialogue::OnBnClickedOk()
 {
-	// TODO: Add your control notification handler code here
+	//TODO: Add your control notification handler code here
 	CDialogEx::OnOK();
-}
-
+}//End OnBnClickedOk

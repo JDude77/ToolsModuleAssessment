@@ -1,7 +1,6 @@
 #include "SceneObject.h"
 
-
-
+//Default constructor "zeroing" all values
 SceneObject::SceneObject()
 {
 	ID = 0;
@@ -48,9 +47,9 @@ SceneObject::SceneObject()
 	light_constant = 1;
 	light_linear = 1;
 	light_quadratic = 1;
-}
+}//End default constructor
 
 
 SceneObject::~SceneObject()
 {
-}
+}//End destructor

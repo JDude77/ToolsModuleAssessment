@@ -1,10 +1,7 @@
 #include "MFCFrame.h"
 #include "resource.h"
 
-
-
 BEGIN_MESSAGE_MAP(CMyFrame, CFrameWnd)
-	
 	ON_WM_CREATE()
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
@@ -14,19 +11,18 @@ static UINT indicators[] =
 	ID_SEPARATOR,
 	ID_INDICATOR_TOOL
 };
-//FRAME CLASS
 
-
-//frame initialiser
+//Frame initialiser
 CMyFrame::CMyFrame()
 {
-	m_selectionID = 999; //an obviously wrong selection ID,  to verify its working
-}
+	//Set to an obviously-wrong selection ID, to verify it's working
+	m_selectionID = 999; 
+}//End default constructor
 
 void CMyFrame::SetCurrentSelectionID(int ID)
 {
 	m_selectionID = ID;
-}
+}//End SetCurrentSelectionID
 
 void CMyFrame::OnUpdatePage(CCmdUI * pCmdUI)
 {
@@ -34,19 +30,20 @@ void CMyFrame::OnUpdatePage(CCmdUI * pCmdUI)
 	CString strPage;
 	strPage.Format(_T("%d"), m_selectionID);
 	pCmdUI->SetText(strPage);
-}
+}//End OnUpdatePage
 
-//oncretae, called after init but before window is shown. 
+//OnCreate - called after init but before window is shown
 int CMyFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
 
-	// create a view to occupy the client area of the frame //This is where DirectX is rendered
+	//Create a view to occupy the client area of the frame
+	//This is where DirectX is rendered
 	if (!m_DirXView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
 	{
 		TRACE0("Failed to create view window\n");
 		return -1;
-	}
+	}//End if
 
 	m_menu1.LoadMenuW(IDR_MENU1);
 	SetMenu(&m_menu1);
@@ -56,17 +53,19 @@ int CMyFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
-	}
+	}//End if
 	
 	CRect rect;
 	GetClientRect(&rect);
 	if (!m_wndStatusBar.Create(this))
 	{
 		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
+		return -1;
+	}//End if
+
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
-	m_wndStatusBar.SetPaneInfo(1, ID_INDICATOR_TOOL, SBPS_NORMAL, rect.Width() - 500);//set width of status bar panel
+	//Set width of status bar panel
+	m_wndStatusBar.SetPaneInfo(1, ID_INDICATOR_TOOL, SBPS_NORMAL, rect.Width() - 500);
 
 	return 0;
-}
+}//End OnCreate

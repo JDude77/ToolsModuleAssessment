@@ -75,18 +75,18 @@ namespace DX
             static char s_str[64] = { 0 };
             sprintf_s(s_str, "Failure with HRESULT of %08X", result);
             return s_str;
-        }
+        }//End what
 
     private:
         HRESULT result;
     };
 
-    // Helper utility converts D3D API failures into exceptions.
+    //Helper utility converts D3D API failures into exceptions
     inline void ThrowIfFailed(HRESULT hr)
     {
         if (FAILED(hr))
         {
             throw com_exception(hr);
-        }
-    }
+        }//End if
+    }//End ThrowIfFailed
 }

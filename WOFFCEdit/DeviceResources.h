@@ -7,14 +7,14 @@
 
 namespace DX
 {
-    // Provides an interface for an application that owns DeviceResources to be notified of the device being lost or created.
+    //Provides an interface for an application that owns DeviceResources to be notified of the device being lost or created.
     interface IDeviceNotify
     {
         virtual void OnDeviceLost() = 0;
         virtual void OnDeviceRestored() = 0;
     };
 
-    // Controls all the DirectX device resources.
+    //Controls all the DirectX device resources.
     class DeviceResources
     {
     public:
@@ -31,10 +31,10 @@ namespace DX
         void RegisterDeviceNotify(IDeviceNotify* deviceNotify) { m_deviceNotify = deviceNotify; }
         void Present();
 
-        // Device Accessors.
+        //Device Accessors
         RECT GetOutputSize() const { return m_outputSize; }
 
-        // Direct3D Accessors.
+        //Direct3D Accessors
         ID3D11Device*           GetD3DDevice() const                    { return m_d3dDevice.Get(); }
         ID3D11Device1*          GetD3DDevice1() const                   { return m_d3dDevice1.Get(); }
         ID3D11DeviceContext*    GetD3DDeviceContext() const             { return m_d3dContext.Get(); }
@@ -49,35 +49,35 @@ namespace DX
         D3D11_VIEWPORT          GetScreenViewport() const               { return m_screenViewport; }
         UINT                    GetBackBufferCount() const              { return m_backBufferCount; }
 
-        // Performance events
+        //Performance events
         void PIXBeginEvent(_In_z_ const wchar_t* name)
         {
             if (m_d3dAnnotation)
             {
                 m_d3dAnnotation->BeginEvent(name);
-            }
-        }
+            }//End if
+        }//End PIXBeginEvent
 
         void PIXEndEvent()
         {
             if (m_d3dAnnotation)
             {
                 m_d3dAnnotation->EndEvent();
-            }
-        }
+            }//End if
+        }//End PIXEndEvent
 
         void PIXSetMarker(_In_z_ const wchar_t* name)
         {
             if (m_d3dAnnotation)
             {
                 m_d3dAnnotation->SetMarker(name);
-            }
-        }
+            }//End if
+        }//End PIXSetMarker
 
     private:
         void GetHardwareAdapter(IDXGIAdapter1** ppAdapter);
 
-        // Direct3D objects.
+        //Direct3D objects
         Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
         Microsoft::WRL::ComPtr<ID3D11Device1>           m_d3dDevice1;
         Microsoft::WRL::ComPtr<ID3D11DeviceContext>     m_d3dContext;
@@ -86,23 +86,23 @@ namespace DX
         Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_swapChain1;
         Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_d3dAnnotation;
 
-        // Direct3D rendering objects. Required for 3D.
+        //Direct3D rendering objects - required for 3D
         Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_d3dRenderTargetView;
         Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  m_d3dDepthStencilView;
         D3D11_VIEWPORT                                  m_screenViewport;
 
-        // Direct3D properties.
+        //Direct3D properties
         DXGI_FORMAT                                     m_backBufferFormat;
         DXGI_FORMAT                                     m_depthBufferFormat;
         UINT                                            m_backBufferCount;
         D3D_FEATURE_LEVEL                               m_d3dMinFeatureLevel;
 
-        // Cached device properties.
+        //Cached device properties
         HWND                                            m_window;
         D3D_FEATURE_LEVEL                               m_d3dFeatureLevel;
         RECT                                            m_outputSize;
 
-        // The IDeviceNotify can be held directly as it owns the DeviceResources.
+        //The IDeviceNotify can be held directly, as it owns the DeviceResources
         IDeviceNotify*                                  m_deviceNotify;
-    };
-}
+    };//End DeviceResources
+}//End namespace DX

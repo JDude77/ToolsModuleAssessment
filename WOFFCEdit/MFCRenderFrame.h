@@ -2,32 +2,18 @@
 #include <afxwin.h> 
 #include <afxext.h>
 
-
-// CChildView window
-
+//CChildView window
 class CChildRender : public CWnd
 {
-	// Construction
 public:
 	CChildRender();
-
-	// Attributes
-public:
-
-	// Operations
-public:
-
-	// Overrides
-protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-
-	// Implementation
-public:
 	virtual ~CChildRender();
 
-	// Generated message map functions
 protected:
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	
+protected:
+	//Generated message map functions
 	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 };
-
