@@ -283,16 +283,21 @@ void ToolMain::UpdateInput(const MSG* msg)
 			m_keyArray[msg->wParam] = false;
 			break;
 
+		//Mouse movement
 		case WM_MOUSEMOVE:
+			m_toolInputCommands.mouseX = msg->pt.x;
+			m_toolInputCommands.mouseY = msg->pt.y;
 			break;
 
-		//Mouse button down
-		case WM_LBUTTONDOWN:	
+		//Mouse right button down
+		case WM_RBUTTONDOWN:	
+			m_toolInputCommands.activateCameraMovement = true;
 			//Set flag for the mouse button in inputcommands
 			break;
 
-		//Mouse button up
-		case WM_LBUTTONUP:
+		//Mouse right button up
+		case WM_RBUTTONUP:
+			m_toolInputCommands.activateCameraMovement = false;
 			break;
 	}//End switch
 

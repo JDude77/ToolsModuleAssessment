@@ -11,7 +11,7 @@ using namespace DirectX;
 using namespace SimpleMath;
 using Microsoft::WRL::ComPtr;
 
-Game::Game()
+Game::Game() : m_camera(std::make_unique<Camera>())
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_deviceResources->RegisterDeviceNotify(this);
@@ -20,35 +20,6 @@ Game::Game()
 	//Initial settings
 	//Modes
 	m_grid = false;
-
-	//Functional
-	m_movespeed = 0.30;
-	m_camRotRate = 3.0;
-
-	//Camera
-	m_camPosition.x = 0.0f;
-	m_camPosition.y = 3.7f;
-	m_camPosition.z = -3.5f;
-
-	m_camOrientation.x = 0;
-	m_camOrientation.y = 0;
-	m_camOrientation.z = 0;
-
-	m_camLookAt.x = 0.0f;
-	m_camLookAt.y = 0.0f;
-	m_camLookAt.z = 0.0f;
-
-	m_camLookDirection.x = 0.0f;
-	m_camLookDirection.y = 0.0f;
-	m_camLookDirection.z = 0.0f;
-
-	m_camRight.x = 0.0f;
-	m_camRight.y = 0.0f;
-	m_camRight.z = 0.0f;
-
-	m_camOrientation.x = 0.0f;
-	m_camOrientation.y = 0.0f;
-	m_camOrientation.z = 0.0f;
 }//End default constructor
 
 Game::~Game()
@@ -62,7 +33,7 @@ Game::~Game()
 }//End destructor
 
 //Initialize the Direct3D resources required to run
-void Game::Initialize(HWND window, int width, int height)
+void Game::Initialize(const HWND window, const int width, const int height)
 {
     m_gamePad = std::make_unique<GamePad>();
     m_keyboard = std::make_unique<Keyboard>();
@@ -100,19 +71,20 @@ void Game::Initialize(HWND window, int width, int height)
 #endif
 }//End Initialize
 
-void Game::SetGridState(bool state)
+void Game::SetGridState(const bool state)
 {
 	m_grid = state;
 }//End SetGridState
 
 #pragma region Frame Update
 //Executes the basic game loop
-void Game::Tick(InputCommands *Input)
+void Game::Tick(const InputCommands *Input)
 {
 	//Copy over input commands so we have a local version to use elsewhere
 	m_InputCommands = *Input;
     m_timer.Tick([&]()
     {
+        m_camera->Update(*Input);
         Update(m_timer);
     });
 
@@ -132,35 +104,8 @@ void Game::Tick(InputCommands *Input)
 //Updates the world
 void Game::Update(DX::StepTimer const& timer)
 {
-	//TODO: Any more complex than this, and the camera should be abstracted out to somewhere else
-	//Camera motion is on a plane, so kill the 7 component of the look direction
-    //^ I don't even know what the 7 component is to make that comment make more sense - y, maybe???
-	Vector3 planarMotionVector = m_camLookDirection;
-	planarMotionVector.y = 0.0;
-
-    //Change camera orientation based on rotation inputs
-	if (m_InputCommands.rotRight) m_camOrientation.y -= m_camRotRate;
-	if (m_InputCommands.rotLeft) m_camOrientation.y += m_camRotRate;
-
-	//Create look direction from Euler angles in m_camOrientation
-	m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.z = cos((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.Normalize();
-
-	//Create right vector from look direction
-	m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
-
-	//Process input and update camera, etc.
-	if (m_InputCommands.forward)    m_camPosition += m_camLookDirection * m_movespeed;
-	if (m_InputCommands.back)       m_camPosition -= m_camLookDirection * m_movespeed;
-	if (m_InputCommands.right)		m_camPosition += m_camRight         * m_movespeed;
-	if (m_InputCommands.left)		m_camPosition -= m_camRight         * m_movespeed;
-
-	//Update look-at point
-	m_camLookAt = m_camPosition + m_camLookDirection;
-
 	//Apply camera vectors
-    m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
+    m_view = Matrix::CreateLookAt(m_camera->m_camPosition, m_camera->m_camLookAt, Vector3::UnitY);
 
     m_batchEffect->SetView(m_view);
     m_batchEffect->SetWorld(Matrix::Identity);
@@ -204,7 +149,7 @@ void Game::Render()
     Clear();
 
     m_deviceResources->PIXBeginEvent(L"Render");
-    auto context = m_deviceResources->GetD3DDeviceContext();
+    const auto context = m_deviceResources->GetD3DDeviceContext();
 
 	if (m_grid)
 	{
@@ -217,15 +162,15 @@ void Game::Render()
 	//CAMERA POSITION ON HUD
 	m_sprites->Begin();
 	WCHAR   Buffer[256];
-	std::wstring cameraPositionText =
-        L"Cam X: " + std::to_wstring(m_camPosition.x) +
+    const std::wstring cameraPositionText =
+        L"Cam X: " + std::to_wstring(m_camera->m_camPosition.x) +
         L"     " +
-        L"Cam Z: " + std::to_wstring(m_camPosition.z);
+        L"Cam Z: " + std::to_wstring(m_camera->m_camPosition.z);
 	m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
 	m_sprites->End();
 
 	//RENDER OBJECTS FROM SCENEGRAPH
-	int numRenderObjects = m_displayList.size();
+    const int numRenderObjects = m_displayList.size();
 	for (int i = 0; i < numRenderObjects; i++)
 	{
 		m_deviceResources->PIXBeginEvent(L"Draw Model");
@@ -238,11 +183,11 @@ void Game::Render()
 										m_displayList[i].m_position.z };
 
 		//Convert degrees into radians for rotation matrix
-		XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y *3.1415 / 180,
-															m_displayList[i].m_orientation.x *3.1415 / 180,
-															m_displayList[i].m_orientation.z *3.1415 / 180);
+		const XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y *3.1415 / 180,
+		                                                           m_displayList[i].m_orientation.x *3.1415 / 180,
+		                                                           m_displayList[i].m_orientation.z *3.1415 / 180);
 
-		XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
+		const XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
 
 		//Last variable in draw - make last boolean TRUE for wireframe mode
 		m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);
@@ -271,16 +216,16 @@ void Game::Clear()
     m_deviceResources->PIXBeginEvent(L"Clear");
 
     //Clear the views
-    auto context = m_deviceResources->GetD3DDeviceContext();
-    auto renderTarget = m_deviceResources->GetBackBufferRenderTargetView();
-    auto depthStencil = m_deviceResources->GetDepthStencilView();
+    const auto context = m_deviceResources->GetD3DDeviceContext();
+    const auto renderTarget = m_deviceResources->GetBackBufferRenderTargetView();
+    const auto depthStencil = m_deviceResources->GetDepthStencilView();
 
     context->ClearRenderTargetView(renderTarget, Colors::CornflowerBlue);
     context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 
     //Set the viewport
-    auto viewport = m_deviceResources->GetScreenViewport();
+    const auto viewport = m_deviceResources->GetScreenViewport();
     context->RSSetViewports(1, &viewport);
 
     m_deviceResources->PIXEndEvent();
@@ -306,7 +251,7 @@ void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR orig
 
     for (size_t i = 0; i <= xdivs; ++i)
     {
-        float fPercent = float(i) / float(xdivs);
+        float fPercent = static_cast<float>(i) / static_cast<float>(xdivs);
         fPercent = (fPercent * 2.0f) - 1.0f;
         XMVECTOR vScale = XMVectorScale(xAxis, fPercent);
         vScale = XMVectorAdd(vScale, origin);
@@ -318,7 +263,7 @@ void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR orig
 
     for (size_t i = 0; i <= ydivs; i++)
     {
-        float fPercent = float(i) / float(ydivs);
+        float fPercent = static_cast<float>(i) / static_cast<float>(ydivs);
         fPercent = (fPercent * 2.0f) - 1.0f;
         XMVECTOR vScale = XMVectorScale(yAxis, fPercent);
         vScale = XMVectorAdd(vScale, origin);
@@ -360,7 +305,7 @@ void Game::OnResuming()
 #endif
 }//End OnResuming
 
-void Game::OnWindowSizeChanged(int width, int height)
+void Game::OnWindowSizeChanged(const int width, const int height)
 {
     if (!m_deviceResources->WindowSizeChanged(width, height))
         return;
@@ -368,14 +313,13 @@ void Game::OnWindowSizeChanged(int width, int height)
     CreateWindowSizeDependentResources();
 }//End OnWindowSizeChanged
 
-void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
+void Game::BuildDisplayList(const std::vector<SceneObject>* SceneGraph)
 {
-	auto device = m_deviceResources->GetD3DDevice();
-	auto devicecontext = m_deviceResources->GetD3DDeviceContext();
+	const auto device = m_deviceResources->GetD3DDevice();
 
 	if (!m_displayList.empty()) m_displayList.clear();
 
-	int numObjects = SceneGraph->size();
+	const int numObjects = SceneGraph->size();
     //For every item in the SceneGraph
 	for (int i = 0; i < numObjects; i++)
 	{
@@ -391,7 +335,7 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 		//Load diffuse texture
 		std::wstring texturewstr = StringToWCHART(SceneGraph->at(i).tex_diffuse_path);
         //Load texture into shader resource
-		HRESULT rs = CreateDDSTextureFromFile(device, texturewstr.c_str(), nullptr, &newDisplayObject.m_texture_diffuse);	
+		const HRESULT rs = CreateDDSTextureFromFile(device, texturewstr.c_str(), nullptr, &newDisplayObject.m_texture_diffuse);	
 
 		//If texture loading fails, load error default
 		if (rs)
@@ -403,8 +347,8 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 		//Apply new texture to model's effect
         //Handled using an in-line function via Lambda
 		newDisplayObject.m_model->UpdateEffects([&](IEffect* effect)
-		{	
-			auto lights = dynamic_cast<BasicEffect*>(effect);
+		{
+			const auto lights = dynamic_cast<BasicEffect*>(effect);
 			if (lights)
 			{
 				lights->SetTexture(newDisplayObject.m_texture_diffuse);			
@@ -528,8 +472,8 @@ void Game::CreateDeviceDependentResources()
 //Allocate all memory resources that change on a window SizeChanged event
 void Game::CreateWindowSizeDependentResources()
 {
-    auto size = m_deviceResources->GetOutputSize();
-    float aspectRatio = float(size.right) / float(size.bottom);
+	const auto size = m_deviceResources->GetOutputSize();
+	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
     float fovAngleY = 70.0f * XM_PI / 180.0f;
 
     //This is a simple example of change that can be made when the app is in portrait or snapped view
@@ -574,9 +518,8 @@ void Game::OnDeviceRestored()
 
 std::wstring StringToWCHART(std::string s)
 {
-	int len;
-	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	const int slength = static_cast<int>(s.length()) + 1;
+	const int len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, nullptr, 0);
 	wchar_t* buf = new wchar_t[len];
 	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
 	std::wstring r(buf);

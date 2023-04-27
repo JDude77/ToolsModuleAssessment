@@ -13,6 +13,8 @@
 #include "InputCommands.h"
 #include <vector>
 
+#include "Camera.h"
+
 //A basic game implementation that creates a D3D11 device and provides a game loop
 class Game : public DX::IDeviceNotify
 {
@@ -25,7 +27,7 @@ public:
 	void SetGridState(bool state);
 
 	//Basic game loop
-	void Tick(InputCommands * Input);
+	void Tick(const InputCommands* Input);
 	void Render();
 
 	//Rendering helpers
@@ -43,7 +45,7 @@ public:
 	void OnWindowSizeChanged(int width, int height);
 
 	//Tool-specific
-	void BuildDisplayList(std::vector<SceneObject>* SceneGraph);
+	void BuildDisplayList(const std::vector<SceneObject>* SceneGraph);
 	void BuildDisplayChunk(ChunkObject* SceneChunk);
 	void SaveDisplayChunk(ChunkObject* SceneChunk);
 	void ClearDisplayList();
@@ -61,20 +63,12 @@ private:
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 
 	//Tool-specific
-	std::vector<DisplayObject>		m_displayList;
+	std::vector<DisplayObject>		m_displayList{};
 	DisplayChunk					m_displayChunk;
-	InputCommands					m_InputCommands;
-
-	//Functionality
-	float							m_movespeed;
-
+	InputCommands					m_InputCommands{};
+	
 	//Camera
-	DirectX::SimpleMath::Vector3	m_camPosition;
-	DirectX::SimpleMath::Vector3	m_camOrientation;
-	DirectX::SimpleMath::Vector3	m_camLookAt;
-	DirectX::SimpleMath::Vector3	m_camLookDirection;
-	DirectX::SimpleMath::Vector3	m_camRight;
-	float							m_camRotRate;
+	std::unique_ptr<Camera> m_camera;
 
 	//Control variables
 	//Grid rendering on/off
@@ -86,19 +80,19 @@ private:
     DX::StepTimer                           m_timer;
 
     //Input devices
-    std::unique_ptr<DirectX::GamePad>       m_gamePad;
-    std::unique_ptr<DirectX::Keyboard>      m_keyboard;
-    std::unique_ptr<DirectX::Mouse>         m_mouse;
+    std::unique_ptr<DirectX::GamePad>       m_gamePad{};
+    std::unique_ptr<DirectX::Keyboard>      m_keyboard{};
+    std::unique_ptr<DirectX::Mouse>         m_mouse{};
 
     //DirectXTK objects.
-    std::unique_ptr<DirectX::CommonStates>                                  m_states;
-    std::unique_ptr<DirectX::BasicEffect>                                   m_batchEffect;
-    std::unique_ptr<DirectX::EffectFactory>                                 m_fxFactory;
-    std::unique_ptr<DirectX::GeometricPrimitive>                            m_shape;
-    std::unique_ptr<DirectX::Model>                                         m_model;
-    std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>  m_batch;
-    std::unique_ptr<DirectX::SpriteBatch>                                   m_sprites;
-    std::unique_ptr<DirectX::SpriteFont>                                    m_font;
+    std::unique_ptr<DirectX::CommonStates>                                  m_states{};
+    std::unique_ptr<DirectX::BasicEffect>                                   m_batchEffect{};
+    std::unique_ptr<DirectX::EffectFactory>                                 m_fxFactory{};
+    std::unique_ptr<DirectX::GeometricPrimitive>                            m_shape{};
+    std::unique_ptr<DirectX::Model>                                         m_model{};
+    std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>  m_batch{};
+    std::unique_ptr<DirectX::SpriteBatch>                                   m_sprites{};
+    std::unique_ptr<DirectX::SpriteFont>                                    m_font{};
 
 #ifdef DXTK_AUDIO
     std::unique_ptr<DirectX::AudioEngine>                                   m_audEngine;
