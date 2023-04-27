@@ -2,7 +2,6 @@
 // DeviceResources.cpp - A wrapper for the Direct3D 11 device and swapchain
 //                       (requires DirectX 11.0 Runtime)
 //
-
 #include "pch.h"
 #include "DeviceResources.h"
 
@@ -15,10 +14,10 @@ namespace
     //Check for SDK Layer support.
     bool SdkLayersAvailable()
     {
-        HRESULT hr = D3D11CreateDevice(
+	    const HRESULT hr = D3D11CreateDevice(
             nullptr,
             D3D_DRIVER_TYPE_NULL,       // There is no need to create a real hardware device
-            0,
+            nullptr,
             D3D11_CREATE_DEVICE_DEBUG,  // Check for the SDK layers
             nullptr,                    // Any feature level will do
             0,
@@ -288,7 +287,6 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
             swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
             swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
             swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-			
 
             DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = { 0 };
             fsSwapChainDesc.Windowed = TRUE;

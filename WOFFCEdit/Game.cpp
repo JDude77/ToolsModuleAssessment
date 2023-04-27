@@ -11,6 +11,15 @@ using namespace DirectX;
 using namespace SimpleMath;
 using Microsoft::WRL::ComPtr;
 
+/**
+ * \brief Pi to fifty digits
+ */
+constexpr auto PI_LONG = 3.14159265358979323846264338327950288419716939937510f;
+/**
+ * \brief Pi to the first five decimal digits
+ */
+constexpr auto PI_SHORT = 3.14159f;
+
 Game::Game() : m_camera(std::make_unique<Camera>())
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
@@ -47,6 +56,8 @@ void Game::Initialize(const HWND window, const int width, const int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+    GetClientRect(window, &m_screenDimensions);
+
 #ifdef DXTK_AUDIO
     //Create DirectXTK for audio objects
     AUDIO_ENGINE_FLAGS eflags = AudioEngine_Default;
@@ -78,13 +89,13 @@ void Game::SetGridState(const bool state)
 
 #pragma region Frame Update
 //Executes the basic game loop
-void Game::Tick(const InputCommands *Input)
+void Game::Tick(const InputCommands *input)
 {
 	//Copy over input commands so we have a local version to use elsewhere
-	m_InputCommands = *Input;
+	m_inputCommands = *input;
     m_timer.Tick([&]()
     {
-        m_camera->Update(*Input);
+        m_camera->Update(*input);
         Update(m_timer);
     });
 
@@ -100,6 +111,101 @@ void Game::Tick(const InputCommands *Input)
 
     Render();
 }//End Tick
+
+int Game::MousePicking() const
+{
+    int selectedID = -1;
+    float pickingDistance = 0.0f;
+    float shortestDistance = D3D11_FLOAT32_MAX;
+
+    //Set up selection near and far planes
+    const XMVECTOR nearPlane    = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 0.0f, 1.0f);
+    const XMVECTOR farPlane     = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 1.0f, 1.0f);
+
+    //Loop through the object display list and check each to pick
+    for(int id = 0; id < m_displayList.size(); id++)
+    {
+	    //Get object translation, scale, and rotation
+        const XMVECTORF32 translation =
+        {
+            m_displayList[id].m_position.x,
+            m_displayList[id].m_position.y,
+            m_displayList[id].m_position.z
+        };
+        const XMVECTORF32 scale =
+        {
+            m_displayList[id].m_scale.x,
+            m_displayList[id].m_scale.y,
+            m_displayList[id].m_scale.z
+        };
+	    const XMVECTOR rotation = Quaternion::CreateFromYawPitchRoll
+    	(
+			m_displayList[id].m_orientation.y * PI_SHORT / 180.0f,
+            m_displayList[id].m_orientation.x * PI_SHORT / 180.0f,
+            m_displayList[id].m_orientation.z * PI_SHORT / 180.0f
+        );
+
+        //Construct the matrix of the object in the world
+        XMMATRIX objectTransformMatrix = m_world * XMMatrixTransformation
+    	(
+            g_XMZero,
+            Quaternion::Identity,
+            scale,
+            g_XMZero,
+            rotation,
+            translation
+        );
+
+        //Unproject the points on the near/far plane using the object matrix
+        const XMVECTOR nearPoint = XMVector3Unproject
+    	(
+			nearPlane,
+            0.0f,
+            0.0f,
+            m_screenDimensions.right,
+            m_screenDimensions.bottom,
+            m_deviceResources->GetScreenViewport().MinDepth,
+            m_deviceResources->GetScreenViewport().MaxDepth,
+            m_projection,
+            m_view,
+            objectTransformMatrix
+        );
+        const XMVECTOR farPoint = XMVector3Unproject
+    	(
+			farPlane,
+            0.0f,
+            0.0f,
+            m_screenDimensions.right,
+            m_screenDimensions.bottom,
+            m_deviceResources->GetScreenViewport().MinDepth,
+            m_deviceResources->GetScreenViewport().MaxDepth,
+            m_projection,
+            m_view,
+            objectTransformMatrix
+        );
+
+        //Transform the points into the picking vector
+        XMVECTOR pickingVector = farPoint - nearPoint;
+        pickingVector = XMVector3Normalize(pickingVector);
+
+        //Loop through the object's mesh list
+        auto& objectMeshList = m_displayList[id].m_model.get()->meshes;
+        for(int meshIndex = 0; meshIndex < objectMeshList.size(); meshIndex++)
+        {
+	        if(objectMeshList[meshIndex]->boundingBox.Intersects(nearPoint, pickingVector, pickingDistance))
+	        {
+                if(pickingDistance < shortestDistance)
+                {
+                    shortestDistance = pickingDistance;
+					selectedID = id;
+                }//End if
+	        }//End if
+        }//End for
+    }//End for
+
+    //Return the ID of the selected object
+    return selectedID;
+}//End MousePicking
 
 //Updates the world
 void Game::Update(DX::StepTimer const& timer)
@@ -154,17 +260,18 @@ void Game::Render()
 	if (m_grid)
 	{
 		//Draw procedurally-generated dynamic grid
-		const XMVECTORF32 xaxis = { 512.f, 0.f, 0.f };
-		const XMVECTORF32 yaxis = { 0.f, 0.f, 512.f };
-		DrawGrid(xaxis, yaxis, g_XMZero, 512, 512, Colors::Gray);
+		const XMVECTORF32 xAxis = { 512.f, 0.f, 0.f };
+		const XMVECTORF32 yAxis = { 0.f, 0.f, 512.f };
+		DrawGrid(xAxis, yAxis, g_XMZero, 512, 512, Colors::Gray);
 	}//End if
 
 	//CAMERA POSITION ON HUD
 	m_sprites->Begin();
-	WCHAR   Buffer[256];
     const std::wstring cameraPositionText =
         L"Cam X: " + std::to_wstring(m_camera->m_camPosition.x) +
-        L"     " +
+        L"            " +
+        L"Cam Y: " + std::to_wstring(m_camera->m_camPosition.y) +
+        L"            " +
         L"Cam Z: " + std::to_wstring(m_camera->m_camPosition.z);
 	m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
 	m_sprites->End();
@@ -231,7 +338,7 @@ void Game::Clear()
     m_deviceResources->PIXEndEvent();
 }//End Clear
 
-void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR origin, size_t xdivs, size_t ydivs, GXMVECTOR color)
+void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR origin, size_t xDivs, size_t yDivs, GXMVECTOR color)
 {
     m_deviceResources->PIXBeginEvent(L"Draw Grid");
 
@@ -246,12 +353,12 @@ void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR orig
 
     m_batch->Begin();
 
-    xdivs = std::max<size_t>(1, xdivs);
-    ydivs = std::max<size_t>(1, ydivs);
+    xDivs = std::max<size_t>(1, xDivs);
+    yDivs = std::max<size_t>(1, yDivs);
 
-    for (size_t i = 0; i <= xdivs; ++i)
+    for (size_t i = 0; i <= xDivs; ++i)
     {
-        float fPercent = static_cast<float>(i) / static_cast<float>(xdivs);
+        float fPercent = static_cast<float>(i) / static_cast<float>(xDivs);
         fPercent = (fPercent * 2.0f) - 1.0f;
         XMVECTOR vScale = XMVectorScale(xAxis, fPercent);
         vScale = XMVectorAdd(vScale, origin);
@@ -261,9 +368,9 @@ void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR orig
         m_batch->DrawLine(v1, v2);
     }//End for
 
-    for (size_t i = 0; i <= ydivs; i++)
+    for (size_t i = 0; i <= yDivs; i++)
     {
-        float fPercent = static_cast<float>(i) / static_cast<float>(ydivs);
+        float fPercent = static_cast<float>(i) / static_cast<float>(yDivs);
         fPercent = (fPercent * 2.0f) - 1.0f;
         XMVECTOR vScale = XMVectorScale(yAxis, fPercent);
         vScale = XMVectorAdd(vScale, origin);
@@ -313,13 +420,13 @@ void Game::OnWindowSizeChanged(const int width, const int height)
     CreateWindowSizeDependentResources();
 }//End OnWindowSizeChanged
 
-void Game::BuildDisplayList(const std::vector<SceneObject>* SceneGraph)
+void Game::BuildDisplayList(const std::vector<SceneObject>* sceneGraph)
 {
 	const auto device = m_deviceResources->GetD3DDevice();
 
 	if (!m_displayList.empty()) m_displayList.clear();
 
-	const int numObjects = SceneGraph->size();
+	const int numObjects = sceneGraph->size();
     //For every item in the SceneGraph
 	for (int i = 0; i < numObjects; i++)
 	{
@@ -327,13 +434,13 @@ void Game::BuildDisplayList(const std::vector<SceneObject>* SceneGraph)
 		DisplayObject newDisplayObject;
 		
 		//Load the model
-		std::wstring modelwstr = StringToWCHART(SceneGraph->at(i).model_path);
+		std::wstring modelwstr = StringToWCHART(sceneGraph->at(i).model_path);
         //Get DXSDK to load model
         //Set final boolean to "false" for left-handed coordinate system (Maya)
 		newDisplayObject.m_model = Model::CreateFromCMO(device, modelwstr.c_str(), *m_fxFactory, true);	
 
 		//Load diffuse texture
-		std::wstring texturewstr = StringToWCHART(SceneGraph->at(i).tex_diffuse_path);
+		std::wstring texturewstr = StringToWCHART(sceneGraph->at(i).tex_diffuse_path);
         //Load texture into shader resource
 		const HRESULT rs = CreateDDSTextureFromFile(device, texturewstr.c_str(), nullptr, &newDisplayObject.m_texture_diffuse);	
 
@@ -356,51 +463,51 @@ void Game::BuildDisplayList(const std::vector<SceneObject>* SceneGraph)
 		});
 
 		//Set position
-		newDisplayObject.m_position.x = SceneGraph->at(i).posX;
-		newDisplayObject.m_position.y = SceneGraph->at(i).posY;
-		newDisplayObject.m_position.z = SceneGraph->at(i).posZ;
+		newDisplayObject.m_position.x = sceneGraph->at(i).posX;
+		newDisplayObject.m_position.y = sceneGraph->at(i).posY;
+		newDisplayObject.m_position.z = sceneGraph->at(i).posZ;
 		
 		//Set orientation
-		newDisplayObject.m_orientation.x = SceneGraph->at(i).rotX;
-		newDisplayObject.m_orientation.y = SceneGraph->at(i).rotY;
-		newDisplayObject.m_orientation.z = SceneGraph->at(i).rotZ;
+		newDisplayObject.m_orientation.x = sceneGraph->at(i).rotX;
+		newDisplayObject.m_orientation.y = sceneGraph->at(i).rotY;
+		newDisplayObject.m_orientation.z = sceneGraph->at(i).rotZ;
 
 		//Set scale
-		newDisplayObject.m_scale.x = SceneGraph->at(i).scaX;
-		newDisplayObject.m_scale.y = SceneGraph->at(i).scaY;
-		newDisplayObject.m_scale.z = SceneGraph->at(i).scaZ;
+		newDisplayObject.m_scale.x = sceneGraph->at(i).scaX;
+		newDisplayObject.m_scale.y = sceneGraph->at(i).scaY;
+		newDisplayObject.m_scale.z = sceneGraph->at(i).scaZ;
 
 		//Set wireframe/render flags
-		newDisplayObject.m_render		= SceneGraph->at(i).editor_render;
-		newDisplayObject.m_wireframe	= SceneGraph->at(i).editor_wireframe;
+		newDisplayObject.m_render		= sceneGraph->at(i).editor_render;
+		newDisplayObject.m_wireframe	= sceneGraph->at(i).editor_wireframe;
 
         //Set light data
-		newDisplayObject.m_light_type		= SceneGraph->at(i).light_type;
-		newDisplayObject.m_light_diffuse_r	= SceneGraph->at(i).light_diffuse_r;
-		newDisplayObject.m_light_diffuse_g	= SceneGraph->at(i).light_diffuse_g;
-		newDisplayObject.m_light_diffuse_b	= SceneGraph->at(i).light_diffuse_b;
-		newDisplayObject.m_light_specular_r = SceneGraph->at(i).light_specular_r;
-		newDisplayObject.m_light_specular_g = SceneGraph->at(i).light_specular_g;
-		newDisplayObject.m_light_specular_b = SceneGraph->at(i).light_specular_b;
-		newDisplayObject.m_light_spot_cutoff = SceneGraph->at(i).light_spot_cutoff;
-		newDisplayObject.m_light_constant	= SceneGraph->at(i).light_constant;
-		newDisplayObject.m_light_linear		= SceneGraph->at(i).light_linear;
-		newDisplayObject.m_light_quadratic	= SceneGraph->at(i).light_quadratic;
+		newDisplayObject.m_light_type		    = sceneGraph->at(i).light_type;
+		newDisplayObject.m_light_diffuse_r	    = sceneGraph->at(i).light_diffuse_r;
+		newDisplayObject.m_light_diffuse_g	    = sceneGraph->at(i).light_diffuse_g;
+		newDisplayObject.m_light_diffuse_b	    = sceneGraph->at(i).light_diffuse_b;
+		newDisplayObject.m_light_specular_r     = sceneGraph->at(i).light_specular_r;
+		newDisplayObject.m_light_specular_g     = sceneGraph->at(i).light_specular_g;
+		newDisplayObject.m_light_specular_b     = sceneGraph->at(i).light_specular_b;
+		newDisplayObject.m_light_spot_cutoff    = sceneGraph->at(i).light_spot_cutoff;
+		newDisplayObject.m_light_constant	    = sceneGraph->at(i).light_constant;
+		newDisplayObject.m_light_linear		    = sceneGraph->at(i).light_linear;
+		newDisplayObject.m_light_quadratic	    = sceneGraph->at(i).light_quadratic;
 		
 		m_displayList.push_back(newDisplayObject);
 	}//End for
 }//End BuildDisplayList
 
-void Game::BuildDisplayChunk(ChunkObject* SceneChunk)
+void Game::BuildDisplayChunk(const ChunkObject* sceneChunk)
 {
 	//Populate our local display chunk with all the chunk info we need from the object stored in toolmain
-	m_displayChunk.PopulateChunkData(SceneChunk);
+	m_displayChunk.PopulateChunkData(sceneChunk);
 	m_displayChunk.LoadHeightMap(m_deviceResources);
 	m_displayChunk.m_terrainEffect->SetProjection(m_projection);
 	m_displayChunk.InitialiseBatch();
 }//End BuildDisplayChunk
 
-void Game::SaveDisplayChunk(ChunkObject* SceneChunk)
+void Game::SaveDisplayChunk(ChunkObject* sceneChunk)
 {
 	m_displayChunk.SaveHeightMap();
 }//End SaveDisplayChunk
@@ -516,7 +623,7 @@ void Game::OnDeviceRestored()
 }//End OnDeviceRestored
 #pragma endregion
 
-std::wstring StringToWCHART(std::string s)
+std::wstring StringToWCHART(const std::string s)
 {
 	const int slength = static_cast<int>(s.length()) + 1;
 	const int len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, nullptr, 0);

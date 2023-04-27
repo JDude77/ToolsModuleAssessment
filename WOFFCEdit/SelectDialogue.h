@@ -10,10 +10,10 @@ class SelectDialogue : public CDialogEx
 	DECLARE_DYNAMIC(SelectDialogue)
 
 public:
-	SelectDialogue(CWnd* pParent, std::vector<SceneObject>* SceneGraph);   // Modal - takes in our scenegraph in the constructor
-	SelectDialogue(CWnd* pParent = NULL);
+	SelectDialogue(CWnd* pParent, std::vector<SceneObject>* sceneGraph);   // Modal - takes in our scenegraph in the constructor
+	SelectDialogue(CWnd* pParent = nullptr);
 	virtual ~SelectDialogue();
-	void SetObjectData(std::vector<SceneObject>* SceneGraph, int * Selection);	//Passing in pointers to the data the class will operate on
+	void SetObjectData(std::vector<SceneObject>* sceneGraph, int* selection);	//Passing in pointers to the data the class will operate on
 	
 //Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -25,15 +25,15 @@ protected:
 	afx_msg void End();		//Kill the dialog box
 	afx_msg void Select();	//Item has been selected
 
-	std::vector<SceneObject> * m_sceneGraph;
-	int * m_currentSelection;
+	std::vector<SceneObject> * m_sceneGraph{};
+	int * m_currentSelection{};
 
 	DECLARE_MESSAGE_MAP()
 public:
 	//Control variable for more efficient access of the listbox
 	CListBox m_listBox;
 	virtual BOOL OnInitDialog() override;
-	virtual void PostNcDestroy();
+	void PostNcDestroy() override;
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnLbnSelchangeList1();
 };

@@ -13,10 +13,10 @@ public:
 	DisplayChunk();
 	~DisplayChunk();
 
-	void PopulateChunkData(ChunkObject * SceneChunk);
-	void RenderBatch(std::shared_ptr<DX::DeviceResources>  DevResources);
+	void PopulateChunkData(const ChunkObject* sceneChunk);
+	void RenderBatch(std::shared_ptr<DX::DeviceResources>  devResources);
 	void InitialiseBatch();													//Initial setup - base coordinates, etc. based on scale
-	void LoadHeightMap(std::shared_ptr<DX::DeviceResources>  DevResources);
+	void LoadHeightMap(std::shared_ptr<DX::DeviceResources>  devResources);
 	void SaveHeightMap();													//Saves the heightmap back to file
 	void UpdateTerrain();													//Updates the geometry based on the heightmap
 	void GenerateHeightmap();												//Creates or alters the heightmap
@@ -42,7 +42,7 @@ private:
 	int m_chunk_y_size_metres;
 	int m_chunk_base_resolution;
 
-	std::string m_heightmap_path;
+	std::string m_height_map_path;
 	std::string m_tex_diffuse_path;
 	std::string m_tex_splat_alpha_path;
 	std::string m_tex_splat_1_path;

@@ -14,10 +14,10 @@ BEGIN_MESSAGE_MAP(SelectDialogue, CDialogEx)
 END_MESSAGE_MAP()
 
 //Constructor used in modal
-SelectDialogue::SelectDialogue(CWnd* pParent, std::vector<SceneObject>* SceneGraph)
+SelectDialogue::SelectDialogue(CWnd* pParent, std::vector<SceneObject>* sceneGraph)
 	: CDialogEx(IDD_DIALOG1, pParent)
 {
-	m_sceneGraph = SceneGraph;
+	m_sceneGraph = sceneGraph;
 }//End modal constructor
 
 //Constructor used in modeless
@@ -31,9 +31,9 @@ SelectDialogue::~SelectDialogue()
 }//End destructor
 
 //Pass through pointers to the data in the tool we want to manipulate
-void SelectDialogue::SetObjectData(std::vector<SceneObject>* SceneGraph, int * selection)
+void SelectDialogue::SetObjectData(std::vector<SceneObject>* sceneGraph, int * selection)
 {
-	m_sceneGraph = SceneGraph;
+	m_sceneGraph = sceneGraph;
 	m_currentSelection = selection;
 
 	const int numSceneObjects = m_sceneGraph->size();

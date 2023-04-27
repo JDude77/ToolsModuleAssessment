@@ -9,15 +9,19 @@ ToolMain::ToolMain()
 	m_currentChunk = 0;				//Default chunk value
 	m_selectedObject = 0;			//Initial selection ID
 	m_sceneGraph.clear();			//Clear the vector for the scenegraph
-	m_databaseConnection = NULL;
+	m_databaseConnection = nullptr;
 
 	//Zero input commands
-	m_toolInputCommands.forward		= false;
-	m_toolInputCommands.back		= false;
-	m_toolInputCommands.left		= false;
-	m_toolInputCommands.right		= false;
-	m_toolInputCommands.rotLeft		= false;
-	m_toolInputCommands.rotRight	= false;
+	m_toolInputCommands.forward					= false;
+	m_toolInputCommands.back					= false;
+	m_toolInputCommands.left					= false;
+	m_toolInputCommands.right					= false;
+	m_toolInputCommands.rotLeft					= false;
+	m_toolInputCommands.rotRight				= false;
+	m_toolInputCommands.activateCameraMovement	= false;
+	m_toolInputCommands.mousePickingActive		= false;
+	m_toolInputCommands.mouseX					= 0.0f;
+	m_toolInputCommands.mouseY					= 0.0f;
 }//End default constructor
 
 
@@ -41,7 +45,7 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 	m_d3dRenderer.Initialize(handle, m_width, m_height);
 
 	//Establish database connection
-	int rc = sqlite3_open_v2("database/test.db", &m_databaseConnection, SQLITE_OPEN_READWRITE, NULL);
+	const int rc = sqlite3_open_v2("database/test.db", &m_databaseConnection, SQLITE_OPEN_READWRITE, NULL);
 
 	if (rc) 
 	{
@@ -261,6 +265,12 @@ void ToolMain::Tick(MSG *msg)
 	//Do we have a selection
 	//Do we have a mode
 	//Are we clicking/dragging/releasing
+	if(m_toolInputCommands.mousePickingActive)
+	{
+		m_selectedObject = m_d3dRenderer.MousePicking();
+		m_toolInputCommands.mousePickingActive = false;
+	}//End if
+
 	//Has something changed
 		//Update Scenegraph
 		//Add to scenegraph
@@ -285,8 +295,18 @@ void ToolMain::UpdateInput(const MSG* msg)
 
 		//Mouse movement
 		case WM_MOUSEMOVE:
-			m_toolInputCommands.mouseX = msg->pt.x;
-			m_toolInputCommands.mouseY = msg->pt.y;
+			m_toolInputCommands.mouseX = GET_X_LPARAM(msg->lParam);
+			m_toolInputCommands.mouseY = GET_Y_LPARAM(msg->lParam);
+			break;
+
+		//Mouse left button down
+		case WM_LBUTTONDOWN:
+			m_toolInputCommands.mousePickingActive = true;
+			break;
+
+		//Mouse left button up
+		case WM_LBUTTONUP:
+			m_toolInputCommands.mousePickingActive = false;
 			break;
 
 		//Mouse right button down

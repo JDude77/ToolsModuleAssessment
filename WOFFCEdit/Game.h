@@ -1,7 +1,6 @@
 //
 // Game.h
 //
-
 #pragma once
 
 #include "DeviceResources.h"
@@ -27,7 +26,7 @@ public:
 	void SetGridState(bool state);
 
 	//Basic game loop
-	void Tick(const InputCommands* Input);
+	void Tick(const InputCommands* input);
 	void Render();
 
 	//Rendering helpers
@@ -45,10 +44,13 @@ public:
 	void OnWindowSizeChanged(int width, int height);
 
 	//Tool-specific
-	void BuildDisplayList(const std::vector<SceneObject>* SceneGraph);
-	void BuildDisplayChunk(ChunkObject* SceneChunk);
-	void SaveDisplayChunk(ChunkObject* SceneChunk);
+	void BuildDisplayList(const std::vector<SceneObject>* sceneGraph);
+	void BuildDisplayChunk(const ChunkObject* sceneChunk);
+	void SaveDisplayChunk(ChunkObject* sceneChunk);
 	void ClearDisplayList();
+
+	//Functionality
+	int MousePicking() const;
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -60,15 +62,18 @@ private:
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
-	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
+	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xDivs, size_t yDivs, DirectX::GXMVECTOR color);
 
 	//Tool-specific
 	std::vector<DisplayObject>		m_displayList{};
 	DisplayChunk					m_displayChunk;
-	InputCommands					m_InputCommands{};
+	InputCommands					m_inputCommands{};
+
+	//Screen size
+	RECT							m_screenDimensions{};
 	
 	//Camera
-	std::unique_ptr<Camera> m_camera;
+	std::unique_ptr<Camera>			m_camera;
 
 	//Control variables
 	//Grid rendering on/off

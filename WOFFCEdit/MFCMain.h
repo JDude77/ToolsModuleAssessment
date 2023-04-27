@@ -10,7 +10,6 @@
 #include "MFCFrame.h"
 #include "SelectDialogue.h"
 
-
 class MFCMain : public CWinApp 
 {
 public:
@@ -23,9 +22,9 @@ private:
 
 	CMyFrame * m_frame{};						//Handle to the frame where all our UI is
 	HWND m_toolHandle{};						//Handle to the MFC window
-	ToolMain m_ToolSystem;					//Instance of Tool System that we interface to
-	CRect WindowRECT;						//Window area rectangle
-	SelectDialogue m_ToolSelectDialogue;	//For modeless dialogue, declare it here
+	ToolMain m_toolSystem;					//Instance of Tool System that we interface to
+	CRect windowRect;						//Window area rectangle
+	SelectDialogue m_toolSelectDialogue;	//For modeless dialogue, declare it here
 
 	int m_width{};		
 	int m_height{};

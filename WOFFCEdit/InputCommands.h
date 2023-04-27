@@ -10,7 +10,11 @@ struct InputCommands
 	bool down;
 	bool rotRight;
 	bool rotLeft;
+
+	//Intended to be right-click
 	bool activateCameraMovement;
+	//Intended to be left-click
+	bool mousePickingActive;
 
 	float mouseX;
 	float mouseY;

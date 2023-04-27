@@ -3,8 +3,8 @@
 //Default constructor "zeroing" all values
 DisplayObject::DisplayObject()
 {
-	m_model =			NULL;
-	m_texture_diffuse = NULL;
+	m_model =			nullptr;
+	m_texture_diffuse = nullptr;
 
 	m_orientation.x =	0.0f;
 	m_orientation.y =	0.0f;

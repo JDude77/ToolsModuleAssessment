@@ -20,16 +20,17 @@ m_camPosition(Vector3::Zero), m_camOrientation(Vector3::Zero), m_camLookAt(Vecto
 
 void Camera::Update(const InputCommands m_InputCommands)
 {
+	//Get change in mouse position from previous frame
+	const float mouseDeltaX = m_InputCommands.mouseX - m_prevMouseX;
+	const float mouseDeltaY = m_InputCommands.mouseY - m_prevMouseY;
+
+	//Update previous mouse position
+	m_prevMouseX = m_InputCommands.mouseX;
+	m_prevMouseY = m_InputCommands.mouseY;
+
+	//If we're using the mouse camera control
 	if (m_InputCommands.activateCameraMovement)
 	{
-		//Get change in mouse position from previous frame
-		const float mouseDeltaX = m_InputCommands.mouseX - m_prevMouseX;
-		const float mouseDeltaY = m_InputCommands.mouseY - m_prevMouseY;
-
-		//Update previous mouse position
-		m_prevMouseX = m_InputCommands.mouseX;
-		m_prevMouseY = m_InputCommands.mouseY;
-
 		//Calculate change in orientation of the camera
 		m_camOrientation.y -= mouseDeltaX * m_camRotRate;
 		m_camOrientation.x -= mouseDeltaY * m_camRotRate;

@@ -39,7 +39,7 @@ int CMyFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct)
 
 	//Create a view to occupy the client area of the frame
 	//This is where DirectX is rendered
-	if (!m_DirXView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, nullptr))
+	if (!m_directXView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, nullptr))
 	{
 		TRACE0("Failed to create view window\n");
 		return -1;
