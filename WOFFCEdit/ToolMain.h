@@ -24,7 +24,7 @@ public:
 	afx_msg void	onActionSaveTerrain();									//Save chunk geometry
 
 	void	Tick(MSG* msg);
-	void	UpdateInput(MSG* msg);
+	void	UpdateInput(const MSG* msg);
 
 private:	
 	void	onContentAdded();

@@ -21,14 +21,14 @@ public:
 
 private:
 
-	CMyFrame * m_frame;						//Handle to the frame where all our UI is
-	HWND m_toolHandle;						//Handle to the MFC window
+	CMyFrame * m_frame{};						//Handle to the frame where all our UI is
+	HWND m_toolHandle{};						//Handle to the MFC window
 	ToolMain m_ToolSystem;					//Instance of Tool System that we interface to
 	CRect WindowRECT;						//Window area rectangle
 	SelectDialogue m_ToolSelectDialogue;	//For modeless dialogue, declare it here
 
-	int m_width;		
-	int m_height;
+	int m_width{};		
+	int m_height{};
 	
 	//Interface funtions for menu, toolbar, etc
 	afx_msg void MenuFileQuit();

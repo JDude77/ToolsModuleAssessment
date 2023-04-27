@@ -19,12 +19,12 @@ CMyFrame::CMyFrame()
 	m_selectionID = 999; 
 }//End default constructor
 
-void CMyFrame::SetCurrentSelectionID(int ID)
+void CMyFrame::SetCurrentSelectionID(const int ID)
 {
 	m_selectionID = ID;
 }//End SetCurrentSelectionID
 
-void CMyFrame::OnUpdatePage(CCmdUI * pCmdUI)
+void CMyFrame::OnUpdatePage(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable();
 	CString strPage;
@@ -33,13 +33,13 @@ void CMyFrame::OnUpdatePage(CCmdUI * pCmdUI)
 }//End OnUpdatePage
 
 //OnCreate - called after init but before window is shown
-int CMyFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CMyFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct)
 {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
 
 	//Create a view to occupy the client area of the frame
 	//This is where DirectX is rendered
-	if (!m_DirXView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
+	if (!m_DirXView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, nullptr))
 	{
 		TRACE0("Failed to create view window\n");
 		return -1;

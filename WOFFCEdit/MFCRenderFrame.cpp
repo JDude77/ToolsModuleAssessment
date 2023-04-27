@@ -4,7 +4,7 @@
 #define new DEBUG_NEW
 #endif
 
-// CChildView
+//CChildView
 CChildRender::CChildRender()
 {
 }//End default constructor
@@ -12,7 +12,6 @@ CChildRender::CChildRender()
 CChildRender::~CChildRender()
 {
 }//End destructor
-
 
 BEGIN_MESSAGE_MAP(CChildRender, CWnd)
 	ON_WM_PAINT()
@@ -27,7 +26,7 @@ BOOL CChildRender::PreCreateWindow(CREATESTRUCT& cs)
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
-		::LoadCursor(NULL, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1), NULL);
+		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1), nullptr);
 
 	return TRUE;
 }//End PreCreateWindow

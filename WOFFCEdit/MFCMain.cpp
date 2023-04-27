@@ -16,15 +16,15 @@ BOOL MFCMain::InitInstance()
 	m_pMainWnd = m_frame;
 
 	//TODO: Change window name for own sanity
-	m_frame->Create(	NULL,
-					_T("World Of Flim-Flam Craft Editor"),
-					WS_OVERLAPPEDWINDOW,
-					CRect(100, 100, 1024, 768),
-					NULL,
-					NULL,
-					0,
-					NULL
-				);
+	m_frame->Create(nullptr,
+	                _T("World Of Flim-Flam Craft Editor"),
+	                WS_OVERLAPPEDWINDOW,
+	                CRect(100, 100, 1024, 768),
+	                nullptr,
+	                nullptr,
+	                0,
+	                nullptr
+	);
 
 	//Show and set the window to run and update
 	m_frame->ShowWindow(SW_SHOW);
@@ -47,17 +47,17 @@ int MFCMain::Run()
 	MSG msg;
 	BOOL bGotMsg;
 
-	PeekMessage(&msg, NULL, 0U, 0U, PM_NOREMOVE);
+	PeekMessage(&msg, nullptr, 0U, 0U, PM_NOREMOVE);
 
 	while (WM_QUIT != msg.message)
 	{
 		if (true)
 		{
-			bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
+			bGotMsg = (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE) != 0);
 		}//End if
 		else
 		{
-			bGotMsg = (GetMessage(&msg, NULL, 0U, 0U) != 0);
+			bGotMsg = (GetMessage(&msg, nullptr, 0U, 0U) != 0);
 		}//End else
 
 		if (bGotMsg)

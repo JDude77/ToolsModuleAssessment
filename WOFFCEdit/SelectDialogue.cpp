@@ -21,10 +21,10 @@ SelectDialogue::SelectDialogue(CWnd* pParent, std::vector<SceneObject>* SceneGra
 }//End modal constructor
 
 //Constructor used in modeless
-SelectDialogue::SelectDialogue(CWnd * pParent)			
-	: CDialogEx(IDD_DIALOG1, pParent)
+SelectDialogue::SelectDialogue(CWnd * pParent)
+	: CDialogEx(IDD_DIALOG1, pParent), m_sceneGraph(nullptr), m_currentSelection(nullptr)
 {
-}//End modeless constructor
+} //End modeless constructor
 
 SelectDialogue::~SelectDialogue()
 {
@@ -36,7 +36,7 @@ void SelectDialogue::SetObjectData(std::vector<SceneObject>* SceneGraph, int * s
 	m_sceneGraph = SceneGraph;
 	m_currentSelection = selection;
 
-	int numSceneObjects = m_sceneGraph->size();
+	const int numSceneObjects = m_sceneGraph->size();
 	//Iterate through all the objects in the scene graph and put an entry for each in the listbox
 	for (int i = 0; i < numSceneObjects; i++)
 	{
@@ -61,7 +61,7 @@ void SelectDialogue::End()
 
 void SelectDialogue::Select()
 {
-	int index = m_listBox.GetCurSel();
+	const int index = m_listBox.GetCurSel();
 	CString currentSelectionValue;
 	
 	m_listBox.GetText(index, currentSelectionValue);

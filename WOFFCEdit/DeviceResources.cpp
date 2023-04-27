@@ -34,13 +34,13 @@ namespace
 };
 
 //Constructor for DeviceResources
-DX::DeviceResources::DeviceResources(DXGI_FORMAT backBufferFormat, DXGI_FORMAT depthBufferFormat, UINT backBufferCount, D3D_FEATURE_LEVEL minFeatureLevel) :
+DX::DeviceResources::DeviceResources(const DXGI_FORMAT backBufferFormat, const DXGI_FORMAT depthBufferFormat, const UINT backBufferCount, const D3D_FEATURE_LEVEL minFeatureLevel) :
     m_screenViewport{},
     m_backBufferFormat(backBufferFormat),
     m_depthBufferFormat(depthBufferFormat),
     m_backBufferCount(backBufferCount),
     m_d3dMinFeatureLevel(minFeatureLevel),
-    m_window(0),
+    m_window(nullptr),
     m_d3dFeatureLevel(D3D_FEATURE_LEVEL_9_1),
     m_deviceNotify(nullptr)
 {
@@ -65,7 +65,7 @@ void DX::DeviceResources::CreateDeviceResources()
 #endif
 
     // Determine DirectX hardware feature levels this app will support.
-    static const D3D_FEATURE_LEVEL s_featureLevels[] =
+    static constexpr D3D_FEATURE_LEVEL s_featureLevels[] =
     {
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0,
@@ -98,7 +98,7 @@ void DX::DeviceResources::CreateDeviceResources()
         hr = D3D11CreateDevice(
             adapter.Get(),
             D3D_DRIVER_TYPE_UNKNOWN,
-            0,
+            nullptr,
             creationFlags,
             s_featureLevels,
             featLevelCount,
@@ -141,7 +141,7 @@ void DX::DeviceResources::CreateDeviceResources()
         hr = D3D11CreateDevice(
             nullptr,
             D3D_DRIVER_TYPE_WARP, // Create a WARP device instead of a hardware device.
-            0,
+            nullptr,
             creationFlags,
             s_featureLevels,
             featLevelCount,
@@ -226,13 +226,13 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
     m_d3dContext->Flush();
 
     //Determine the render target size in pixels
-    UINT backBufferWidth = std::max<UINT>(m_outputSize.right - m_outputSize.left, 1);
-    UINT backBufferHeight = std::max<UINT>(m_outputSize.bottom - m_outputSize.top, 1);
+    const UINT backBufferWidth = std::max<UINT>(m_outputSize.right - m_outputSize.left, 1);
+    const UINT backBufferHeight = std::max<UINT>(m_outputSize.bottom - m_outputSize.top, 1);
 
     if (m_swapChain)
     {
         // If the swap chain already exists, resize it
-        HRESULT hr = m_swapChain->ResizeBuffers(
+        const HRESULT hr = m_swapChain->ResizeBuffers(
             m_backBufferCount,
             backBufferWidth,
             backBufferHeight,
@@ -343,7 +343,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
     if (m_depthBufferFormat != DXGI_FORMAT_UNKNOWN)
     {
         //Create a depth stencil view for use with 3D rendering if needed
-        CD3D11_TEXTURE2D_DESC depthStencilDesc(
+        const CD3D11_TEXTURE2D_DESC depthStencilDesc(
             m_depthBufferFormat,
             backBufferWidth,
             backBufferHeight,
@@ -359,7 +359,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
             depthStencil.GetAddressOf()
             ));
 
-        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+        const CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
         DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(
             depthStencil.Get(),
             &depthStencilViewDesc,
@@ -377,7 +377,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 }//End CreateWindowSizeDependentResources
 
 //This method is called when the Win32 window is created (or re-created)
-void DX::DeviceResources::SetWindow(HWND window, int width, int height)
+void DX::DeviceResources::SetWindow(const HWND window, const int width, const int height)
 {
     m_window = window;
 
@@ -387,7 +387,7 @@ void DX::DeviceResources::SetWindow(HWND window, int width, int height)
 }//End SetWindow
 
 //This method is called when the Win32 window changes size
-bool DX::DeviceResources::WindowSizeChanged(int width, int height)
+bool DX::DeviceResources::WindowSizeChanged(const int width, const int height)
 {
     RECT newRc;
     newRc.left = newRc.top = 0;
@@ -446,7 +446,7 @@ void DX::DeviceResources::Present()
 {
     //The first argument instructs DXGI to block until VSync, putting the application to sleep until the next VSync
     //This ensures we don't waste any cycles rendering frames that will never be displayed to the screen
-    HRESULT hr = m_swapChain->Present(1, 0);
+    const HRESULT hr = m_swapChain->Present(1, 0);
 
     if (m_d3dContext1)
     {

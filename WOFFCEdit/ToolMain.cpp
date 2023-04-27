@@ -16,12 +16,15 @@ ToolMain::ToolMain()
 	m_toolInputCommands.back		= false;
 	m_toolInputCommands.left		= false;
 	m_toolInputCommands.right		= false;
+	m_toolInputCommands.rotLeft		= false;
+	m_toolInputCommands.rotRight	= false;
 }//End default constructor
 
 
 ToolMain::~ToolMain()
 {
-	sqlite3_close(m_databaseConnection);		//Close the database connection
+	//Close the database connection
+	sqlite3_close(m_databaseConnection);
 }//End destructor
 
 
@@ -59,14 +62,12 @@ void ToolMain::onActionLoad()
 	{
 		m_sceneGraph.clear();
 	}//End if
-
-	char *sqlCommand;
-	char *ErrMSG = 0;
+	
 	sqlite3_stmt *pResults;
 	sqlite3_stmt *pResultsChunk;
 
 	//SQL command which will return all records from the objects table.
-	sqlCommand = "SELECT * from Objects";				
+	const char* sqlCommand = "SELECT * from Objects";				
 	//Send command and fill result object
 	int rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResults, 0);
 	
@@ -138,8 +139,8 @@ void ToolMain::onActionLoad()
 
 	//THE WORLD CHUNK
 	//SQL command which will return all records from the chunks table.
-	sqlCommand = "SELECT * from Chunks";				
-	rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResultsChunk, 0);
+	sqlCommand = "SELECT * from Chunks";
+	rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResultsChunk, nullptr);
 	
 	sqlite3_step(pResultsChunk);
 	m_chunk.ID =						sqlite3_column_int(pResultsChunk,									0);
@@ -170,17 +171,16 @@ void ToolMain::onActionLoad()
 
 void ToolMain::onActionSave()
 {
-	char *ErrMSG = 0;
 	sqlite3_stmt *pResults;
 
 	//Delete all in-world objects
-	char* sqlCommand = "DELETE FROM Objects";	
+	const char* sqlCommand = "DELETE FROM Objects";	
 	int rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResults, 0);
 	sqlite3_step(pResults);
 
 	//Populate with new objects
-	std::wstring sqlCommand2;
-	int numObjects = m_sceneGraph.size();
+	const int numObjects = m_sceneGraph.size();
+	std::string sqlCommand2;
 
 	//Loop through the scene graph
 	for (int i = 0; i < numObjects; i++)
@@ -244,11 +244,11 @@ void ToolMain::onActionSave()
 			<< m_sceneGraph.at(i).light_linear << ","
 			<< m_sceneGraph.at(i).light_quadratic
 			<< ")";
-		std::string sqlCommand2 = command.str();
-		rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand2.c_str(), -1, &pResults, 0);
+		sqlCommand2 = command.str();
+		sqlite3_prepare_v2(m_databaseConnection, sqlCommand2.c_str(), -1, &pResults, nullptr);
 		sqlite3_step(pResults);	
 	}
-	MessageBox(NULL, L"Objects Saved", L"Notification", MB_OK);
+	MessageBox(nullptr, L"Objects Saved", L"Notification", MB_OK);
 }//End onActionSave
 
 void ToolMain::onActionSaveTerrain()
@@ -270,27 +270,30 @@ void ToolMain::Tick(MSG *msg)
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 }//End Tick
 
-void ToolMain::UpdateInput(MSG * msg)
+void ToolMain::UpdateInput(const MSG* msg)
 {
 	switch (msg->message)
 	{
-	//Global inputs
-	case WM_KEYDOWN:
-		m_keyArray[msg->wParam] = true;
-		break;
+		//Global inputs
+		case WM_KEYDOWN:
+			m_keyArray[msg->wParam] = true;
+			break;
 
-	case WM_KEYUP:
-		m_keyArray[msg->wParam] = false;
-		break;
+		case WM_KEYUP:
+			m_keyArray[msg->wParam] = false;
+			break;
 
-	case WM_MOUSEMOVE:
-		break;
+		case WM_MOUSEMOVE:
+			break;
 
-	//Mouse button down
-	//Check when it's up, too
-	case WM_LBUTTONDOWN:	
-		//Set flag for the mouse button in inputcommands
-		break;
+		//Mouse button down
+		case WM_LBUTTONDOWN:	
+			//Set flag for the mouse button in inputcommands
+			break;
+
+		//Mouse button up
+		case WM_LBUTTONUP:
+			break;
 	}//End switch
 
 	//Update all the actual app functionality that we want
