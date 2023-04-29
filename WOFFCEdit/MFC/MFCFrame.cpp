@@ -1,5 +1,5 @@
 #include "MFCFrame.h"
-#include "resource.h"
+#include "../Resources/resource.h"
 
 BEGIN_MESSAGE_MAP(CMyFrame, CFrameWnd)
 	ON_WM_CREATE()

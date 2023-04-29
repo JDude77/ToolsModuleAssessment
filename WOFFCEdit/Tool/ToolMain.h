@@ -1,9 +1,9 @@
 #pragma once
 
 #include <afxext.h>
-#include "pch.h"
-#include "Game.h"
-#include "sqlite3.h"
+#include "../Renderer/pch.h"
+#include "../Renderer/Game.h"
+#include "../SQLITE/sqlite3.h"
 #include "SceneObject.h"
 #include "InputCommands.h"
 #include <vector>

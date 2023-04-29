@@ -5,14 +5,14 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
-#include "SceneObject.h"
+#include "../Tool/SceneObject.h"
 #include "DisplayObject.h"
 #include "DisplayChunk.h"
-#include "ChunkObject.h"
-#include "InputCommands.h"
+#include "../Tool/ChunkObject.h"
+#include "../Tool/InputCommands.h"
 #include <vector>
 
-#include "Camera.h"
+#include "../Tool/Camera.h"
 
 //A basic game implementation that creates a D3D11 device and provides a game loop
 class Game : public DX::IDeviceNotify

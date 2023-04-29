@@ -4,7 +4,6 @@
 
 #include "pch.h"
 #include "Game.h"
-#include "DisplayObject.h"
 #include <string>
 
 using namespace DirectX;
@@ -559,20 +558,20 @@ void Game::CreateDeviceDependentResources()
             m_batchInputLayout.ReleaseAndGetAddressOf())
     );
 
-    m_font = std::make_unique<SpriteFont>(device, L"SegoeUI_18.spritefont");
+    m_font = std::make_unique<SpriteFont>(device, L"Resources/SegoeUI_18.spritefont");
 
 	//m_shape = GeometricPrimitive::CreateTeapot(context, 4.f, 8);
 
     //SDKMESH has to use clockwise winding with right-handed coordinates, so textures are flipped in the U-axis
-    m_model = Model::CreateFromSDKMESH(device, L"tiny.sdkmesh", *m_fxFactory);
+    m_model = Model::CreateFromSDKMESH(device, L"Resources/tiny.sdkmesh", *m_fxFactory);
 	
     //Load textures
     DX::ThrowIfFailed(
-        CreateDDSTextureFromFile(device, L"seafloor.dds", nullptr, m_texture1.ReleaseAndGetAddressOf())
+        CreateDDSTextureFromFile(device, L"Resources/seafloor.dds", nullptr, m_texture1.ReleaseAndGetAddressOf())
     );
 
     DX::ThrowIfFailed(
-        CreateDDSTextureFromFile(device, L"windowslogo.dds", nullptr, m_texture2.ReleaseAndGetAddressOf())
+        CreateDDSTextureFromFile(device, L"Resources/windowslogo.dds", nullptr, m_texture2.ReleaseAndGetAddressOf())
     );
 }//End CreateDeviceDependentResources
 

@@ -2,7 +2,7 @@
 #include <afxwin.h> 
 #include <afxext.h>
 #include "MFCRenderFrame.h"
-#include "ToolMain.h"
+#include "../Tool/ToolMain.h"
 
 class CMyFrame : public CFrameWnd
 {

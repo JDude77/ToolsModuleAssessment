@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "DeviceResources.h"
-#include "ChunkObject.h"
+#include "../Tool/ChunkObject.h"
 
 //Geometric resolution
 //Note: hard coded

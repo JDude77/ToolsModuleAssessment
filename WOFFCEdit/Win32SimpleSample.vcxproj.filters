@@ -38,99 +38,101 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="sqlite3.c">
+    <ClCompile Include="SQLITE\sqlite3.c">
       <Filter>SQLITE</Filter>
     </ClCompile>
-    <ClCompile Include="ChunkObject.cpp">
+    <ClCompile Include="Tool\ChunkObject.cpp">
       <Filter>Tool\Source</Filter>
     </ClCompile>
-    <ClCompile Include="SceneObject.cpp">
+    <ClCompile Include="Tool\SceneObject.cpp">
       <Filter>Tool\Source</Filter>
     </ClCompile>
-    <ClCompile Include="ToolMain.cpp">
+    <ClCompile Include="Tool\ToolMain.cpp">
       <Filter>Tool\Source</Filter>
     </ClCompile>
-    <ClCompile Include="DeviceResources.cpp">
+    <ClCompile Include="Renderer\DeviceResources.cpp">
       <Filter>Renderer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="DisplayChunk.cpp">
+    <ClCompile Include="Renderer\DisplayChunk.cpp">
       <Filter>Renderer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="DisplayObject.cpp">
+    <ClCompile Include="Renderer\DisplayObject.cpp">
       <Filter>Renderer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Renderer\Game.cpp">
       <Filter>Renderer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="Renderer\pch.cpp">
       <Filter>Renderer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="MFCFrame.cpp">
+    <ClCompile Include="MFC\MFCFrame.cpp">
       <Filter>MFC\Source</Filter>
     </ClCompile>
-    <ClCompile Include="MFCMain.cpp">
+    <ClCompile Include="MFC\MFCMain.cpp">
       <Filter>MFC\Source</Filter>
     </ClCompile>
-    <ClCompile Include="MFCRenderFrame.cpp">
+    <ClCompile Include="MFC\MFCRenderFrame.cpp">
       <Filter>MFC\Source</Filter>
     </ClCompile>
-    <ClCompile Include="SelectDialogue.cpp">
+    <ClCompile Include="MFC\SelectDialogue.cpp">
       <Filter>MFC\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Tool\Camera.cpp">
       <Filter>Tool\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="sqlite3.h">
+    <ClInclude Include="SQLITE\sqlite3.h">
       <Filter>SQLITE</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="ChunkObject.h">
+    <ClInclude Include="Tool\ChunkObject.h">
       <Filter>Tool\Header</Filter>
     </ClInclude>
-    <ClInclude Include="InputCommands.h">
+    <ClInclude Include="Tool\InputCommands.h">
       <Filter>Tool\Header</Filter>
     </ClInclude>
-    <ClInclude Include="SceneObject.h">
+    <ClInclude Include="Tool\SceneObject.h">
       <Filter>Tool\Header</Filter>
     </ClInclude>
-    <ClInclude Include="ToolMain.h">
+    <ClInclude Include="Tool\ToolMain.h">
       <Filter>Tool\Header</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceResources.h">
+    <ClInclude Include="Renderer\DeviceResources.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="DisplayChunk.h">
+    <ClInclude Include="Renderer\DisplayChunk.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="DisplayObject.h">
+    <ClInclude Include="Renderer\DisplayObject.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="Renderer\Game.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="Renderer\pch.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="StepTimer.h">
+    <ClInclude Include="Renderer\StepTimer.h">
       <Filter>Renderer\Header</Filter>
     </ClInclude>
-    <ClInclude Include="MFCFrame.h">
+    <ClInclude Include="MFC\MFCFrame.h">
       <Filter>MFC\Header</Filter>
     </ClInclude>
-    <ClInclude Include="MFCMain.h">
+    <ClInclude Include="MFC\MFCMain.h">
       <Filter>MFC\Header</Filter>
     </ClInclude>
-    <ClInclude Include="MFCRenderFrame.h">
+    <ClInclude Include="MFC\MFCRenderFrame.h">
       <Filter>MFC\Header</Filter>
     </ClInclude>
-    <ClInclude Include="SelectDialogue.h">
+    <ClInclude Include="MFC\SelectDialogue.h">
       <Filter>MFC\Header</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="Tool\Camera.h">
       <Filter>Tool\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\resource.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -142,7 +144,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="toolbar1.bmp">
+    <Image Include="Resources\toolbarsave.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

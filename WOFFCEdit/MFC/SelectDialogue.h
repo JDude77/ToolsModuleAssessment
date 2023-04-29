@@ -1,8 +1,8 @@
 #pragma once
 #include "afxdialogex.h"
-#include "resource.h"
+#include "../Resources/resource.h"
 #include "afxwin.h"
-#include "SceneObject.h"
+#include "../Tool/SceneObject.h"
 #include <vector>
 
 class SelectDialogue : public CDialogEx

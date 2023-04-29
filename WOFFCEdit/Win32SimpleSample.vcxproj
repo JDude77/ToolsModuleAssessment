@@ -165,41 +165,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ChunkObject.cpp" />
-    <ClCompile Include="DeviceResources.cpp" />
-    <ClCompile Include="DisplayChunk.cpp" />
-    <ClCompile Include="DisplayObject.cpp" />
-    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Tool\Camera.cpp" />
+    <ClCompile Include="Tool\ChunkObject.cpp" />
+    <ClCompile Include="Renderer\DeviceResources.cpp" />
+    <ClCompile Include="Renderer\DisplayChunk.cpp" />
+    <ClCompile Include="Renderer\DisplayObject.cpp" />
+    <ClCompile Include="Renderer\Game.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MFCFrame.cpp" />
-    <ClCompile Include="MFCRenderFrame.cpp" />
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="MFCMain.cpp" />
-    <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="SelectDialogue.cpp" />
-    <ClCompile Include="sqlite3.c" />
-    <ClCompile Include="ToolMain.cpp" />
+    <ClCompile Include="MFC\MFCFrame.cpp" />
+    <ClCompile Include="MFC\MFCRenderFrame.cpp" />
+    <ClCompile Include="Renderer\pch.cpp" />
+    <ClCompile Include="MFC\MFCMain.cpp" />
+    <ClCompile Include="Tool\SceneObject.cpp" />
+    <ClCompile Include="MFC\SelectDialogue.cpp" />
+    <ClCompile Include="SQLITE\sqlite3.c" />
+    <ClCompile Include="Tool\ToolMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ChunkObject.h" />
-    <ClInclude Include="DeviceResources.h" />
-    <ClInclude Include="DisplayChunk.h" />
-    <ClInclude Include="DisplayObject.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="InputCommands.h" />
-    <ClInclude Include="MFCFrame.h" />
-    <ClInclude Include="MFCRenderFrame.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="SceneObject.h" />
-    <ClInclude Include="SelectDialogue.h" />
-    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="Tool\Camera.h" />
+    <ClInclude Include="Tool\ChunkObject.h" />
+    <ClInclude Include="Renderer\DeviceResources.h" />
+    <ClInclude Include="Renderer\DisplayChunk.h" />
+    <ClInclude Include="Renderer\DisplayObject.h" />
+    <ClInclude Include="Renderer\Game.h" />
+    <ClInclude Include="Tool\InputCommands.h" />
+    <ClInclude Include="MFC\MFCFrame.h" />
+    <ClInclude Include="MFC\MFCRenderFrame.h" />
+    <ClInclude Include="Renderer\pch.h" />
+    <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Tool\SceneObject.h" />
+    <ClInclude Include="MFC\SelectDialogue.h" />
+    <ClInclude Include="SQLITE\sqlite3.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="StepTimer.h" />
-    <ClInclude Include="MFCMain.h" />
-    <ClInclude Include="ToolMain.h" />
+    <ClInclude Include="Renderer\StepTimer.h" />
+    <ClInclude Include="MFC\MFCMain.h" />
+    <ClInclude Include="Tool\ToolMain.h" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="database\data\Scene1.fbx">
@@ -212,7 +212,7 @@
     <ResourceCompile Include="Win32SimpleSample.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="toolbar1.bmp" />
+    <Image Include="Resources\toolbarsave.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

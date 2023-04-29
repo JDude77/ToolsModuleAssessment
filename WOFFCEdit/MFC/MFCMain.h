@@ -3,10 +3,10 @@
 #include <afxwin.h> 
 #include <afxext.h>
 #include <afx.h>
-#include "pch.h"
-#include "Game.h"
-#include "ToolMain.h"
-#include "resource.h"
+#include "../Renderer/pch.h"
+#include "../Renderer/Game.h"
+#include "../Tool/ToolMain.h"
+#include "../Resources/resource.h"
 #include "MFCFrame.h"
 #include "SelectDialogue.h"
 
@@ -33,7 +33,7 @@ private:
 	afx_msg void MenuFileQuit();
 	afx_msg void MenuFileSaveTerrain();
 	afx_msg void MenuEditSelect();
-	afx_msg	void ToolBarButton1();
+	afx_msg	void ToolBarSave();
 
 	//Required macro for message map functionality - one per class
 	DECLARE_MESSAGE_MAP()	

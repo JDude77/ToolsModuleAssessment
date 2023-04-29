@@ -1,5 +1,5 @@
-#include "pch.h"
 #include "Camera.h"
+#include "../Renderer/pch.h"
 
 using namespace DirectX;
 using namespace SimpleMath;

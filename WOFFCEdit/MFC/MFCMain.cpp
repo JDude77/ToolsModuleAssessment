@@ -1,11 +1,11 @@
 #include "MFCMain.h"
-#include "resource.h"
+#include "../Resources/resource.h"
 
 BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_QUIT,		&MFCMain::MenuFileQuit)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT,		&MFCMain::MenuEditSelect)
-	ON_COMMAND(ID_BUTTON40001,		&MFCMain::ToolBarButton1)
+	ON_COMMAND(ID_BUTTON40001,		&MFCMain::ToolBarSave)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -72,7 +72,8 @@ int MFCMain::Run()
 		else
 		{	
 			int ID = m_toolSystem.getCurrentSelectionID();
-			std::wstring statusString = L"Selected Object: " + std::to_wstring(ID);
+			
+			std::wstring statusString = ID != -1 ? L"Selected Object: " + std::to_wstring(ID) : L"Selected Object: NONE";
 			m_toolSystem.Tick(&msg);
 
 			//Send current object ID to status bar in the main frame
@@ -105,7 +106,7 @@ void MFCMain::MenuEditSelect()
 	m_toolSelectDialogue.SetObjectData(&m_toolSystem.m_sceneGraph, &m_toolSystem.m_selectedObject);
 }//End MenuEditSelect
 
-void MFCMain::ToolBarButton1()
+void MFCMain::ToolBarSave()
 {
 	m_toolSystem.onActionSave();
 }//End ToolBarButton1

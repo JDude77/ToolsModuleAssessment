@@ -1,6 +1,6 @@
 // SelectDialogue.cpp : implementation file
 
-#include "stdafx.h"
+#include "../stdafx.h"
 #include "SelectDialogue.h"
 
 IMPLEMENT_DYNAMIC(SelectDialogue, CDialogEx)

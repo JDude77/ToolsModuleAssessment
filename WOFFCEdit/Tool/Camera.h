@@ -1,6 +1,8 @@
 #pragma once
+// ReSharper disable once CppUnusedIncludeDirective
+#include <d3d11.h>
+#include <SimpleMath.h>
 
-#include "DisplayObject.h"
 #include "InputCommands.h"
 
 class Camera 
