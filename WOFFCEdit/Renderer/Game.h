@@ -51,6 +51,10 @@ public:
 
 	//Functionality
 	int MousePicking() const;
+	void Delete(int& selectedID);
+	void Copy(int selectedID);
+	void Cut(int& selectedID);
+	void Paste();
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -74,6 +78,9 @@ private:
 	
 	//Camera
 	std::unique_ptr<Camera>			m_camera;
+
+	//Copy/paste
+	DisplayObject					m_objectToCopy;
 
 	//Control variables
 	//Grid rendering on/off

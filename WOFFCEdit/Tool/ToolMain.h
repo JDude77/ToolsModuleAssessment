@@ -47,5 +47,7 @@ private:
 	int m_width;									//Dimensions passed to directX
 	int m_height;
 	int m_currentChunk;								//The current chunk of the database that we are operating on - dictates loading and saving
+
+	bool m_pasteOnce;								//Hard-stop to prevent multiple objects being pasted when only one is intended
 #pragma endregion
 };

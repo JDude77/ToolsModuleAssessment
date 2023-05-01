@@ -11,6 +11,8 @@ ToolMain::ToolMain()
 	m_sceneGraph.clear();			//Clear the vector for the scenegraph
 	m_databaseConnection = nullptr;
 
+	m_pasteOnce = false;
+
 	//Zero input commands
 	m_toolInputCommands.forward					= false;
 	m_toolInputCommands.back					= false;
@@ -20,6 +22,10 @@ ToolMain::ToolMain()
 	m_toolInputCommands.rotRight				= false;
 	m_toolInputCommands.activateCameraMovement	= false;
 	m_toolInputCommands.mousePickingActive		= false;
+	m_toolInputCommands.copy					= false;
+	m_toolInputCommands.cut						= false;
+	m_toolInputCommands.paste					= false;
+	m_toolInputCommands.deleteObject			= false;
 	m_toolInputCommands.mouseX					= 0.0f;
 	m_toolInputCommands.mouseY					= 0.0f;
 }//End default constructor
@@ -271,8 +277,32 @@ void ToolMain::Tick(MSG *msg)
 		m_toolInputCommands.mousePickingActive = false;
 	}//End if
 
+	if(m_toolInputCommands.deleteObject)
+	{
+		m_d3dRenderer.Delete(m_selectedObject);
+	}//End if
+
+	if(m_toolInputCommands.cut)
+	{
+		m_d3dRenderer.Cut(m_selectedObject);
+	}//End if
+
+	if(m_toolInputCommands.copy)
+	{
+		m_d3dRenderer.Copy(m_selectedObject);
+	}//End if
+
+	if(!m_pasteOnce && m_toolInputCommands.paste)
+	{
+		m_pasteOnce = true;
+		m_d3dRenderer.Paste();
+	}//End if
+	else if(m_pasteOnce && !m_toolInputCommands.paste)
+	{
+		m_pasteOnce = false;
+	}//End else if
 	//Has something changed
-		//Update Scenegraph
+		//Update scenegraph
 		//Add to scenegraph
 		//Resend scenegraph to Direct X renderer
 
@@ -288,7 +318,6 @@ void ToolMain::UpdateInput(const MSG* msg)
 		case WM_KEYDOWN:
 			m_keyArray[msg->wParam] = true;
 			break;
-
 		case WM_KEYUP:
 			m_keyArray[msg->wParam] = false;
 			break;
@@ -323,6 +352,14 @@ void ToolMain::UpdateInput(const MSG* msg)
 
 	//Update all the actual app functionality that we want
 	//Information will either be used in toolmain, or sent down to the renderer (Camera movement, etc.)
+
+	//Delete command
+	m_toolInputCommands.deleteObject = m_keyArray[VK_DELETE] ? true : false;
+
+	//Control commands
+	m_toolInputCommands.copy =		m_keyArray[VK_CONTROL] && m_keyArray['C'] ? true : false;
+	m_toolInputCommands.cut =		m_keyArray[VK_CONTROL] && m_keyArray['X'] ? true : false;
+	m_toolInputCommands.paste =		m_keyArray[VK_CONTROL] && m_keyArray['V'] ? true : false;
 
 	//WASD movement
 	m_toolInputCommands.forward =	m_keyArray['W'] ? true : false;

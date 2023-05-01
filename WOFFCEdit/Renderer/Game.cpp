@@ -206,6 +206,57 @@ int Game::MousePicking() const
     return selectedID;
 }//End MousePicking
 
+void Game::Delete(int& selectedID)
+{
+    //Can't delete if nothing is selected
+    if(selectedID == -1) return;
+
+    //Remove the object from the display list
+    m_displayList.erase(m_displayList.begin() + selectedID);
+
+    //Set ID to -1 because we just deleted the object that was selected
+    selectedID = -1;
+}//End Delete
+
+void Game::Copy(const int selectedID)
+{
+    //Can't copy if nothing is selected
+    if(selectedID == -1) return;
+
+    m_objectToCopy = m_displayList[selectedID];
+}//End Copy
+
+void Game::Cut(int& selectedID)
+{
+    //Can't cut if nothing is selected
+    if(selectedID == -1) return;
+
+    m_objectToCopy = m_displayList[selectedID];
+
+    //Remove the object from the display list as part of cut
+    m_displayList.erase(m_displayList.begin() + selectedID);
+
+    //Set ID to -1 because we just cut the object that was selected
+    selectedID = -1;
+}//End Cut
+
+void Game::Paste()
+{
+    //Can't paste if we don't have anything to paste
+    if(m_objectToCopy.m_model == nullptr) return;
+
+    //Slightly offset the position to prevent overlapping
+    m_objectToCopy.m_position = Vector3
+    (
+		m_objectToCopy.m_position.x + 0.1f,
+        m_objectToCopy.m_position.y + 0.1f,
+        m_objectToCopy.m_position.z + 0.1f
+    );
+
+    //Create the new object in the display list
+    m_displayList.push_back(m_objectToCopy);
+}//End Paste
+
 //Updates the world
 void Game::Update(DX::StepTimer const& timer)
 {
@@ -272,7 +323,7 @@ void Game::Render()
         L"Cam Y: " + std::to_wstring(m_camera->m_camPosition.y) +
         L"            " +
         L"Cam Z: " + std::to_wstring(m_camera->m_camPosition.z);
-	m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
+	m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::White);
 	m_sprites->End();
 
 	//RENDER OBJECTS FROM SCENEGRAPH
