@@ -48,6 +48,6 @@ private:
 	int m_height;
 	int m_currentChunk;								//The current chunk of the database that we are operating on - dictates loading and saving
 
-	bool m_pasteOnce;								//Hard-stop to prevent multiple objects being pasted when only one is intended
+	bool m_executeOnce;								//Hard-stop to prevent multiple commands activating when only one is intended
 #pragma endregion
 };

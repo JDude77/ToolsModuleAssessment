@@ -26,4 +26,8 @@ struct InputCommands
 	bool cut;
 	bool paste;
 	bool deleteObject;
+
+	//Undo/redo
+	bool undo;
+	bool redo;
 };

@@ -4,6 +4,10 @@
 
 #include "pch.h"
 #include "Game.h"
+
+#include "../Tool/Commands/DeleteCommand.h"
+#include "../Tool/Commands/CutCommand.h"
+#include "../Tool/Commands/PasteCommand.h"
 #include <string>
 
 using namespace DirectX;
@@ -86,31 +90,7 @@ void Game::SetGridState(const bool state)
 	m_grid = state;
 }//End SetGridState
 
-#pragma region Frame Update
-//Executes the basic game loop
-void Game::Tick(const InputCommands *input)
-{
-	//Copy over input commands so we have a local version to use elsewhere
-	m_inputCommands = *input;
-    m_timer.Tick([&]()
-    {
-        m_camera->Update(*input);
-        Update(m_timer);
-    });
-
-#ifdef DXTK_AUDIO
-    // Only update audio engine once per frame
-    if (!m_audEngine->IsCriticalError() && m_audEngine->Update())
-    {
-        // Setup a retry in 1 second
-        m_audioTimerAcc = 1.f;
-        m_retryDefault = true;
-    }//End if
-#endif
-
-    Render();
-}//End Tick
-
+#pragma region Functionality
 int Game::MousePicking() const
 {
     int selectedID = -1;
@@ -211,11 +191,15 @@ void Game::Delete(int& selectedID)
     //Can't delete if nothing is selected
     if(selectedID == -1) return;
 
-    //Remove the object from the display list
-    m_displayList.erase(m_displayList.begin() + selectedID);
+    //Create new delete command and push it to the command stack
+    Command* newDeletion = new DeleteCommand(m_displayList, selectedID, m_displayList[selectedID]);
+    m_commandStack.push(newDeletion);
 
-    //Set ID to -1 because we just deleted the object that was selected
-    selectedID = -1;
+    //Execute the deletion
+    newDeletion->Execute();
+
+    //Clear the redo stack from the new command invalidating it
+    while(!m_redoStack.empty()) m_redoStack.pop();
 }//End Delete
 
 void Game::Copy(const int selectedID)
@@ -231,13 +215,18 @@ void Game::Cut(int& selectedID)
     //Can't cut if nothing is selected
     if(selectedID == -1) return;
 
+    //Set the object to copy
     m_objectToCopy = m_displayList[selectedID];
 
-    //Remove the object from the display list as part of cut
-    m_displayList.erase(m_displayList.begin() + selectedID);
+    //Create new cut command and push it to the command stack
+    Command* newCut = new CutCommand(m_displayList, selectedID, m_objectToCopy);
+    m_commandStack.push(newCut);
 
-    //Set ID to -1 because we just cut the object that was selected
-    selectedID = -1;
+    //Execute the cut
+    newCut->Execute();
+
+    //Clear the redo stack from the new command invalidating it
+    while(!m_redoStack.empty()) m_redoStack.pop();
 }//End Cut
 
 void Game::Paste()
@@ -245,17 +234,64 @@ void Game::Paste()
     //Can't paste if we don't have anything to paste
     if(m_objectToCopy.m_model == nullptr) return;
 
-    //Slightly offset the position to prevent overlapping
-    m_objectToCopy.m_position = Vector3
-    (
-		m_objectToCopy.m_position.x + 0.1f,
-        m_objectToCopy.m_position.y + 0.1f,
-        m_objectToCopy.m_position.z + 0.1f
-    );
+    //Create new paste command and push it to the command stack
+    Command* newPaste = new PasteCommand(m_displayList, m_objectToCopy);
+    m_commandStack.push(newPaste);
 
-    //Create the new object in the display list
-    m_displayList.push_back(m_objectToCopy);
+    //Execute the paste
+    newPaste->Execute();
+
+    //Clear the redo stack from the new command invalidating it
+    while(!m_redoStack.empty()) m_redoStack.pop();
 }//End Paste
+
+void Game::Undo()
+{
+    //Can't undo if there's no commands to undo
+    if(!m_commandStack.empty())
+    {
+	    m_commandStack.top()->Undo();
+        m_redoStack.push(m_commandStack.top());
+        m_commandStack.pop();
+    }//End if
+}//End Undo
+
+void Game::Redo()
+{
+    //Can't redo if there's no commands to redo
+    if(!m_redoStack.empty())
+    {
+	    m_redoStack.top()->Execute();
+        m_commandStack.push(m_redoStack.top());
+        m_redoStack.pop();
+    }//End if
+}//End Redo
+#pragma endregion
+
+#pragma region Frame Update
+//Executes the basic game loop
+void Game::Tick(const InputCommands *input)
+{
+	//Copy over input commands so we have a local version to use elsewhere
+	m_inputCommands = *input;
+    m_timer.Tick([&]()
+    {
+        m_camera->Update(*input);
+        Update(m_timer);
+    });
+
+#ifdef DXTK_AUDIO
+    // Only update audio engine once per frame
+    if (!m_audEngine->IsCriticalError() && m_audEngine->Update())
+    {
+        // Setup a retry in 1 second
+        m_audioTimerAcc = 1.f;
+        m_retryDefault = true;
+    }//End if
+#endif
+
+    Render();
+}//End Tick
 
 //Updates the world
 void Game::Update(DX::StepTimer const& timer)

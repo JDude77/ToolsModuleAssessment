@@ -35,6 +35,12 @@
     <Filter Include="MFC\Source">
       <UniqueIdentifier>{5dcbec6a-713f-455f-a6cc-639582dbd073}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tool\Source\Commands">
+      <UniqueIdentifier>{9748315d-be51-4850-af74-03aa78a4435e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tool\Header\Commands">
+      <UniqueIdentifier>{47431896-6371-47ba-908c-5a92bf719b04}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -79,6 +85,18 @@
     </ClCompile>
     <ClCompile Include="Tool\Camera.cpp">
       <Filter>Tool\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\Commands\Command.cpp">
+      <Filter>Tool\Source\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\Commands\CutCommand.cpp">
+      <Filter>Tool\Source\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\Commands\PasteCommand.cpp">
+      <Filter>Tool\Source\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\Commands\DeleteCommand.cpp">
+      <Filter>Tool\Source\Commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +151,18 @@
     </ClInclude>
     <ClInclude Include="Resources\resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Commands\Command.h">
+      <Filter>Tool\Header\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Commands\CutCommand.h">
+      <Filter>Tool\Header\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Commands\PasteCommand.h">
+      <Filter>Tool\Header\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Commands\DeleteCommand.h">
+      <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

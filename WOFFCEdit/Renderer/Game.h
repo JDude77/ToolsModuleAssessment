@@ -10,7 +10,9 @@
 #include "DisplayChunk.h"
 #include "../Tool/ChunkObject.h"
 #include "../Tool/InputCommands.h"
+#include "../Tool/Commands/Command.h"
 #include <vector>
+#include <stack>
 
 #include "../Tool/Camera.h"
 
@@ -55,6 +57,8 @@ public:
 	void Copy(int selectedID);
 	void Cut(int& selectedID);
 	void Paste();
+	void Undo();
+	void Redo();
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -81,6 +85,10 @@ private:
 
 	//Copy/paste
 	DisplayObject					m_objectToCopy;
+
+	//Undo/redo
+	std::stack<Command*>	m_commandStack;
+	std::stack<Command*>	m_redoStack;
 
 	//Control variables
 	//Grid rendering on/off

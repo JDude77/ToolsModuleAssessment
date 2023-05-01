@@ -11,7 +11,7 @@ ToolMain::ToolMain()
 	m_sceneGraph.clear();			//Clear the vector for the scenegraph
 	m_databaseConnection = nullptr;
 
-	m_pasteOnce = false;
+	m_executeOnce = false;
 
 	//Zero input commands
 	m_toolInputCommands.forward					= false;
@@ -30,13 +30,11 @@ ToolMain::ToolMain()
 	m_toolInputCommands.mouseY					= 0.0f;
 }//End default constructor
 
-
 ToolMain::~ToolMain()
 {
 	//Close the database connection
 	sqlite3_close(m_databaseConnection);
 }//End destructor
-
 
 int ToolMain::getCurrentSelectionID()
 {
@@ -271,36 +269,57 @@ void ToolMain::Tick(MSG *msg)
 	//Do we have a selection
 	//Do we have a mode
 	//Are we clicking/dragging/releasing
-	if(m_toolInputCommands.mousePickingActive)
+	if(!m_executeOnce)
 	{
-		m_selectedObject = m_d3dRenderer.MousePicking();
-		m_toolInputCommands.mousePickingActive = false;
-	}//End if
+		if(m_toolInputCommands.mousePickingActive)
+		{
+			m_executeOnce = true;
+			m_selectedObject = m_d3dRenderer.MousePicking();
+			m_toolInputCommands.mousePickingActive = false;
+		}//End if
 
-	if(m_toolInputCommands.deleteObject)
-	{
-		m_d3dRenderer.Delete(m_selectedObject);
-	}//End if
+		if(m_toolInputCommands.deleteObject)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Delete(m_selectedObject);
+		}//End if
 
-	if(m_toolInputCommands.cut)
-	{
-		m_d3dRenderer.Cut(m_selectedObject);
-	}//End if
+		if(m_toolInputCommands.cut)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Cut(m_selectedObject);
+		}//End if
 
-	if(m_toolInputCommands.copy)
-	{
-		m_d3dRenderer.Copy(m_selectedObject);
-	}//End if
+		if(m_toolInputCommands.copy)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Copy(m_selectedObject);
+		}//End if
 
-	if(!m_pasteOnce && m_toolInputCommands.paste)
-	{
-		m_pasteOnce = true;
-		m_d3dRenderer.Paste();
+		if(m_toolInputCommands.paste)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Paste();
+		}//End if
+
+		if(m_toolInputCommands.undo)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Undo();
+		}//End if
+
+		if(m_toolInputCommands.redo)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.Redo();
+		}//End if
 	}//End if
-	else if(m_pasteOnce && !m_toolInputCommands.paste)
+	else if(!(m_toolInputCommands.redo || m_toolInputCommands.undo || m_toolInputCommands.paste || m_toolInputCommands.copy || m_toolInputCommands.cut || m_toolInputCommands.deleteObject || m_toolInputCommands.mousePickingActive))
 	{
-		m_pasteOnce = false;
+		m_executeOnce = false;
 	}//End else if
+	
+
 	//Has something changed
 		//Update scenegraph
 		//Add to scenegraph
@@ -352,6 +371,10 @@ void ToolMain::UpdateInput(const MSG* msg)
 
 	//Update all the actual app functionality that we want
 	//Information will either be used in toolmain, or sent down to the renderer (Camera movement, etc.)
+
+	//Undo/redo commands
+	m_toolInputCommands.undo = m_keyArray[VK_CONTROL] && m_keyArray['Z'] ? true : false;
+	m_toolInputCommands.redo = m_keyArray[VK_CONTROL] && m_keyArray['Y'] ? true : false;
 
 	//Delete command
 	m_toolInputCommands.deleteObject = m_keyArray[VK_DELETE] ? true : false;
