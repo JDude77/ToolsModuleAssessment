@@ -22,6 +22,8 @@ public:
 	void			onActionLoad();											//Load the current chunk
 	afx_msg	void	onActionSave();											//Save the current chunk
 	afx_msg void	onActionSaveTerrain();									//Save chunk geometry
+	afx_msg void	onActionUndo();											//Undo an action
+	afx_msg void	onActionRedo();											//Redo an undone action
 
 	void	Tick(MSG* msg);
 	void	UpdateInput(const MSG* msg);

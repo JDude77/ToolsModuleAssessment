@@ -53,11 +53,11 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 
 	if (rc) 
 	{
-		TRACE("Can't open database");
+		TRACE("Can't open database\n");
 	}//End if
 	else 
 	{
-		TRACE("Opened database successfully");
+		TRACE("Opened database successfully\n");
 	}//End else
 
 	onActionLoad();
@@ -263,6 +263,16 @@ void ToolMain::onActionSaveTerrain()
 {
 	m_d3dRenderer.SaveDisplayChunk(&m_chunk);
 }//End onActionSaveTerrain
+
+void ToolMain::onActionUndo()
+{
+	m_d3dRenderer.Undo();
+}//End onActionUndo
+
+void ToolMain::onActionRedo()
+{
+	m_d3dRenderer.Redo();
+}//End onActionRedo
 
 void ToolMain::Tick(MSG *msg)
 {

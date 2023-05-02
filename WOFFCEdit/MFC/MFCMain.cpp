@@ -2,10 +2,12 @@
 #include "../Resources/resource.h"
 
 BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
-	ON_COMMAND(ID_FILE_QUIT,		&MFCMain::MenuFileQuit)
-	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
-	ON_COMMAND(ID_EDIT_SELECT,		&MFCMain::MenuEditSelect)
-	ON_COMMAND(ID_BUTTON40001,		&MFCMain::ToolBarSave)
+	ON_COMMAND(ID_FILE_QUIT,				&MFCMain::MenuFileQuit)
+	ON_COMMAND(ID_FILE_SAVETERRAIN,			&MFCMain::MenuFileSaveTerrain)
+	ON_COMMAND(ID_EDIT_SELECT,				&MFCMain::MenuEditSelect)
+	ON_COMMAND(ID_EDIT_UNDO,				&MFCMain::MenuEditUndo)
+	ON_COMMAND(ID_EDIT_REDO,				&MFCMain::MenuEditRedo)		
+	ON_COMMAND(ID_BUTTON40001,				&MFCMain::ToolBarSave)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -70,8 +72,8 @@ int MFCMain::Run()
 			m_toolSystem.UpdateInput(&msg);
 		}//End if
 		else
-		{	
-			int ID = m_toolSystem.getCurrentSelectionID();
+		{
+			const int ID = m_toolSystem.getCurrentSelectionID();
 			
 			std::wstring statusString = ID != -1 ? L"Selected Object: " + std::to_wstring(ID) : L"Selected Object: NONE";
 			m_toolSystem.Tick(&msg);
@@ -105,6 +107,16 @@ void MFCMain::MenuEditSelect()
 	m_toolSelectDialogue.ShowWindow(SW_SHOW);	//Show modeless
 	m_toolSelectDialogue.SetObjectData(&m_toolSystem.m_sceneGraph, &m_toolSystem.m_selectedObject);
 }//End MenuEditSelect
+
+void MFCMain::MenuEditUndo()
+{
+	m_toolSystem.onActionUndo();
+}//End MenuEditUndo
+
+void MFCMain::MenuEditRedo()
+{
+	m_toolSystem.onActionRedo();
+}//End MenuEditUndo
 
 void MFCMain::ToolBarSave()
 {
