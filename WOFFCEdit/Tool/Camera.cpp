@@ -10,7 +10,7 @@ Camera::Camera() :
 m_camPosition(Vector3::Zero), m_camOrientation(Vector3::Zero), m_camLookAt(Vector3::Zero), m_camLookDirection(Vector3::Zero), m_camRight(Vector3::Zero), m_prevMouseX(0.0f), m_prevMouseY(0.0f)
 {
 	//Initialise speed values
-	m_movespeed = 0.20;
+	m_movespeed = m_normalMovespeed;
 	m_camRotRate = 0.5;
 
 	//Initialise camera position values
@@ -18,32 +18,50 @@ m_camPosition(Vector3::Zero), m_camOrientation(Vector3::Zero), m_camLookAt(Vecto
 	m_camPosition.z = -3.5f;
 }//End default constructor
 
-void Camera::Update(const InputCommands m_InputCommands)
+void Camera::ChangeOrientationWithMouse(const float mouseDeltaX, const float mouseDeltaY)
 {
+	//Calculate change in orientation of the camera
+	m_camOrientation.y -= mouseDeltaX * m_camRotRate;
+	m_camOrientation.x -= mouseDeltaY * m_camRotRate;
+
+	//Fix the pitch of the camera to not do flips
+	if (m_camOrientation.x > 89.0f)
+	{
+		m_camOrientation.x = 89.0f;
+	}//End if
+	if (m_camOrientation.x < -89.0f)
+	{
+		m_camOrientation.x = -89.0f;
+	}//End if
+}//End ChangeOrientationWithMouse
+
+void Camera::ProcessCameraInput(const InputCommands& inputCommands)
+{
+	if (inputCommands.forward)	m_camPosition += m_camLookDirection * m_movespeed;
+	if (inputCommands.back)		m_camPosition -= m_camLookDirection * m_movespeed;
+	if (inputCommands.right)	m_camPosition += m_camRight			* m_movespeed;
+	if (inputCommands.left)		m_camPosition -= m_camRight			* m_movespeed;
+	if (inputCommands.up)		m_camPosition += Vector3::UnitY		* m_movespeed;
+	if (inputCommands.down)		m_camPosition -= Vector3::UnitY		* m_movespeed;
+}//End MoveCamera
+
+void Camera::Update(const InputCommands& inputCommands)
+{
+	//Update the camera move speed based on user input
+	m_movespeed = inputCommands.increaseMoveSpeed ? m_fastMovespeed : m_normalMovespeed;
+
 	//Get change in mouse position from previous frame
-	const float mouseDeltaX = m_InputCommands.mouseX - m_prevMouseX;
-	const float mouseDeltaY = m_InputCommands.mouseY - m_prevMouseY;
+	const float mouseDeltaX = inputCommands.mouseX - m_prevMouseX;
+	const float mouseDeltaY = inputCommands.mouseY - m_prevMouseY;
 
 	//Update previous mouse position
-	m_prevMouseX = m_InputCommands.mouseX;
-	m_prevMouseY = m_InputCommands.mouseY;
+	m_prevMouseX = inputCommands.mouseX;
+	m_prevMouseY = inputCommands.mouseY;
 
 	//If we're using the mouse camera control
-	if (m_InputCommands.activateCameraMovement)
+	if (inputCommands.activateCameraMovement)
 	{
-		//Calculate change in orientation of the camera
-		m_camOrientation.y -= mouseDeltaX * m_camRotRate;
-		m_camOrientation.x -= mouseDeltaY * m_camRotRate;
-
-		//Fix the pitch of the camera to not do flips
-		if (m_camOrientation.x > 89.0f)
-		{
-			m_camOrientation.x = 89.0f;
-		}//End if
-		if (m_camOrientation.x < -89.0f)
-		{
-			m_camOrientation.x = -89.0f;
-		}//End if
+		ChangeOrientationWithMouse(mouseDeltaX, mouseDeltaY);
 	}//End if
 
 	//Create look direction from Euler angles in m_camOrientation
@@ -56,30 +74,7 @@ void Camera::Update(const InputCommands m_InputCommands)
 	m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
 
 	//Process user input and update camera
-	if (m_InputCommands.forward)
-	{
-		m_camPosition += m_camLookDirection * m_movespeed;
-	}//End if
-	if (m_InputCommands.back)
-	{
-		m_camPosition -= m_camLookDirection * m_movespeed;
-	}//End if
-	if (m_InputCommands.right)
-	{
-		m_camPosition += m_camRight * m_movespeed;
-	}//End if
-	if (m_InputCommands.left)
-	{
-		m_camPosition -= m_camRight * m_movespeed;
-	}//End if
-	if (m_InputCommands.up)
-	{
-		m_camPosition += Vector3::UnitY * m_movespeed;
-	}//End if
-	if (m_InputCommands.down)
-	{
-		m_camPosition -= Vector3::UnitY * m_movespeed;
-	}//End if
+	ProcessCameraInput(inputCommands);
 
 	//Update the camera look-at point
 	m_camLookAt = m_camPosition + m_camLookDirection;

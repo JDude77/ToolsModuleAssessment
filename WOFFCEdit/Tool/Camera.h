@@ -7,9 +7,15 @@
 
 class Camera 
 {
+private:
+	const float							m_normalMovespeed  = 0.20f;
+	const float							m_fastMovespeed = 0.40f;
+
+	void ChangeOrientationWithMouse(float mouseDeltaX, float mouseDeltaY);
+	void ProcessCameraInput(const InputCommands& inputCommands);
 public:
 	Camera();
-	void Update(InputCommands m_InputCommands);
+	void Update(const InputCommands& inputCommands);
 
 	float								m_movespeed;
 	float								m_camRotRate;

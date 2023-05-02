@@ -26,6 +26,7 @@ ToolMain::ToolMain()
 	m_toolInputCommands.cut						= false;
 	m_toolInputCommands.paste					= false;
 	m_toolInputCommands.deleteObject			= false;
+	m_toolInputCommands.increaseMoveSpeed		= false;
 	m_toolInputCommands.mouseX					= 0.0f;
 	m_toolInputCommands.mouseY					= 0.0f;
 }//End default constructor
@@ -403,4 +404,7 @@ void ToolMain::UpdateInput(const MSG* msg)
 	//Rotation
 	m_toolInputCommands.rotRight =	m_keyArray['E'] ? true : false;
 	m_toolInputCommands.rotLeft =	m_keyArray['Q'] ? true : false;
+
+	//Camera speed
+	m_toolInputCommands.increaseMoveSpeed = m_keyArray[VK_SHIFT] ? true : false;
 }//End UpdateInput

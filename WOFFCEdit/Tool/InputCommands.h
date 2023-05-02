@@ -11,6 +11,7 @@ struct InputCommands
 	bool down;
 	bool rotRight;
 	bool rotLeft;
+	bool increaseMoveSpeed;
 
 	//Intended to be right-click
 	bool activateCameraMovement;
