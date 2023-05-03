@@ -24,6 +24,10 @@ public:
 	afx_msg void	onActionSaveTerrain();									//Save chunk geometry
 	afx_msg void	onActionUndo();											//Undo an action
 	afx_msg void	onActionRedo();											//Redo an undone action
+	afx_msg void	onActionCopy();											//Copy an object
+	afx_msg void	onActionCut();											//Cut an object
+	afx_msg void	onActionPaste();										//Paste an object
+	afx_msg void	onActionDelete();										//Delete an object
 
 	void	Tick(MSG* msg);
 	void	UpdateInput(const MSG* msg);

@@ -186,7 +186,6 @@
     <ClCompile Include="Tool\ToolMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Tool\Commands\DeleteCommand.h" />
     <ClInclude Include="Tool\Commands\PasteCommand.h" />
     <ClInclude Include="Tool\Commands\Command.h" />

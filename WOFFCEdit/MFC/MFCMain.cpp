@@ -6,7 +6,11 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_SAVETERRAIN,			&MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT,				&MFCMain::MenuEditSelect)
 	ON_COMMAND(ID_EDIT_UNDO,				&MFCMain::MenuEditUndo)
-	ON_COMMAND(ID_EDIT_REDO,				&MFCMain::MenuEditRedo)		
+	ON_COMMAND(ID_EDIT_REDO,				&MFCMain::MenuEditRedo)
+	ON_COMMAND(ID_EDIT_COPY,				&MFCMain::MenuEditCopy)
+	ON_COMMAND(ID_EDIT_CUT,					&MFCMain::MenuEditCut)
+	ON_COMMAND(ID_EDIT_PASTE,				&MFCMain::MenuEditPaste)
+	ON_COMMAND(ID_EDIT_DELETE,				&MFCMain::MenuEditDelete)
 	ON_COMMAND(ID_BUTTON40001,				&MFCMain::ToolBarSave)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
@@ -117,6 +121,26 @@ void MFCMain::MenuEditRedo()
 {
 	m_toolSystem.onActionRedo();
 }//End MenuEditUndo
+
+void MFCMain::MenuEditCopy()
+{
+	m_toolSystem.onActionCopy();
+}//End MenuEditCopy
+
+void MFCMain::MenuEditCut()
+{
+	m_toolSystem.onActionCut();
+}//End MenuEditCut
+
+void MFCMain::MenuEditPaste()
+{
+	m_toolSystem.onActionPaste();
+}//End MenuEditPaste
+
+void MFCMain::MenuEditDelete()
+{
+	m_toolSystem.onActionDelete();
+}//End MenuEditDelete
 
 void MFCMain::ToolBarSave()
 {

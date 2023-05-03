@@ -14,14 +14,19 @@ using namespace DirectX;
 using namespace SimpleMath;
 using Microsoft::WRL::ComPtr;
 
+#ifndef PI_LONG
 /**
  * \brief Pi to fifty digits
  */
 constexpr auto PI_LONG = 3.14159265358979323846264338327950288419716939937510f;
+#endif
+
+#ifndef PI_SHORT
 /**
  * \brief Pi to the first five decimal digits
  */
 constexpr auto PI_SHORT = 3.14159f;
+#endif
 
 Game::Game() : m_camera(std::make_unique<Camera>())
 {
@@ -266,6 +271,8 @@ void Game::Redo()
         m_redoStack.pop();
     }//End if
 }//End Redo
+
+
 #pragma endregion
 
 #pragma region Frame Update

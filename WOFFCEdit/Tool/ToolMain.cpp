@@ -275,6 +275,26 @@ void ToolMain::onActionRedo()
 	m_d3dRenderer.Redo();
 }//End onActionRedo
 
+void ToolMain::onActionCopy()
+{
+	m_d3dRenderer.Copy(m_selectedObject);
+}//End onActionCopy
+
+void ToolMain::onActionCut()
+{
+	m_d3dRenderer.Cut(m_selectedObject);
+}//End onActionCut
+
+void ToolMain::onActionPaste()
+{
+	m_d3dRenderer.Paste();
+}//End onActionPaste
+
+void ToolMain::onActionDelete()
+{
+	m_d3dRenderer.Delete(m_selectedObject);
+}//End onActionDelete
+
 void ToolMain::Tick(MSG *msg)
 {
 	//Do we have a selection

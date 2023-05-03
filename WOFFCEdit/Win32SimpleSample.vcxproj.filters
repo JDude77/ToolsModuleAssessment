@@ -164,7 +164,6 @@
     <ClInclude Include="Tool\Commands\DeleteCommand.h">
       <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

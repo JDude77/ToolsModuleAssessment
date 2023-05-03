@@ -6,6 +6,20 @@ using namespace SimpleMath;
 
 using Microsoft::WRL::ComPtr;
 
+#ifndef PI_LONG
+/**
+ * \brief Pi to fifty digits
+ */
+constexpr auto PI_LONG = 3.14159265358979323846264338327950288419716939937510;
+#endif
+
+#ifndef PI_SHORT
+/**
+ * \brief Pi to the first five decimal digits
+ */
+constexpr auto PI_SHORT = 3.14159;
+#endif
+
 Camera::Camera() :
 m_camPosition(Vector3::Zero), m_camOrientation(Vector3::Zero), m_camLookAt(Vector3::Zero), m_camLookDirection(Vector3::Zero), m_camRight(Vector3::Zero), m_prevMouseX(0.0f), m_prevMouseY(0.0f)
 {
@@ -65,9 +79,9 @@ void Camera::Update(const InputCommands& inputCommands)
 	}//End if
 
 	//Create look direction from Euler angles in m_camOrientation
-	m_camLookDirection.x = sin(m_camOrientation.y * 3.1415 / 180) * cos(m_camOrientation.x * 3.1415 / 180);
-	m_camLookDirection.y = sin(m_camOrientation.x * 3.1415 / 180);
-	m_camLookDirection.z = cos(m_camOrientation.y * 3.1415 / 180) * cos(m_camOrientation.x * 3.1415 / 180);
+	m_camLookDirection.x = sin(m_camOrientation.y * PI_SHORT / 180) * cos(m_camOrientation.x * PI_SHORT / 180);
+	m_camLookDirection.y = sin(m_camOrientation.x * PI_SHORT / 180);
+	m_camLookDirection.z = cos(m_camOrientation.y * PI_SHORT / 180) * cos(m_camOrientation.x * PI_SHORT / 180);
 	m_camLookDirection.Normalize();
 
 	//Create right vector using the look direction
