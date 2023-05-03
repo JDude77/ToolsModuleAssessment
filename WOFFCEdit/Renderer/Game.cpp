@@ -244,7 +244,7 @@ void Game::Paste()
     if(m_objectToCopy.m_model == nullptr) return;
 
     //Create new paste command and push it to the command stack
-    Command* newPaste = new PasteCommand(m_displayList, m_objectToCopy);
+    Command* newPaste = new PasteCommand(m_displayList, m_objectToCopy, m_deviceResources);
     m_commandStack.push(newPaste);
 
     //Execute the paste
@@ -580,12 +580,14 @@ void Game::BuildDisplayList(const std::vector<SceneObject>* sceneGraph)
 		
 		//Load the model
 		std::wstring modelwstr = StringToWCHART(sceneGraph->at(i).model_path);
+        newDisplayObject.m_model_path = modelwstr;
         //Get DXSDK to load model
         //Set final boolean to "false" for left-handed coordinate system (Maya)
 		newDisplayObject.m_model = Model::CreateFromCMO(device, modelwstr.c_str(), *m_fxFactory, true);	
 
 		//Load diffuse texture
 		std::wstring texturewstr = StringToWCHART(sceneGraph->at(i).tex_diffuse_path);
+        newDisplayObject.m_texture_diffuse_path = texturewstr;
         //Load texture into shader resource
 		const HRESULT rs = CreateDDSTextureFromFile(device, texturewstr.c_str(), nullptr, &newDisplayObject.m_texture_diffuse);	
 
@@ -778,3 +780,9 @@ std::wstring StringToWCHART(const std::string s)
 	delete[] buf;
 	return r;
 }//End StringToWCHART
+
+std::string WCHARTToString(std::wstring ws)
+{
+	string str(ws.begin(), ws.end());
+	return str;
+}//End WCHARTToString

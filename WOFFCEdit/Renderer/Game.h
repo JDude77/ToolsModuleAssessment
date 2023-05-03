@@ -35,8 +35,8 @@ public:
 	void Clear();
 
 	//IDeviceNotify
-	virtual void OnDeviceLost() override;
-	virtual void OnDeviceRestored() override;
+	void OnDeviceLost() override;
+	void OnDeviceRestored() override;
 
 	//Messages
 	void OnActivated();
@@ -110,7 +110,7 @@ private:
     //DirectXTK objects.
     std::unique_ptr<DirectX::CommonStates>                                  m_states{};
     std::unique_ptr<DirectX::BasicEffect>                                   m_batchEffect{};
-    std::unique_ptr<DirectX::EffectFactory>                                 m_fxFactory{};
+    std::shared_ptr<DirectX::EffectFactory>                                 m_fxFactory{};
     std::unique_ptr<DirectX::GeometricPrimitive>                            m_shape{};
     std::unique_ptr<DirectX::Model>                                         m_model{};
     std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>  m_batch{};
@@ -142,3 +142,4 @@ private:
 };
 
 std::wstring StringToWCHART(std::string s);
+std::string WCHARTToString(std::wstring ws);

@@ -187,10 +187,11 @@ void ToolMain::onActionSave()
 	//Go through every member of the display list
 	for(int i = 0; i < currentDisplayList.size(); i++)
 	{
-		//Create a new scene object and assign all its values
 		SceneObject newSceneObject;
-		newSceneObject.ID = currentDisplayList.at(i).m_ID;
-        newSceneObject.chunk_ID = m_chunk.ID;
+        newSceneObject.ID = currentDisplayList.at(i).m_ID;
+        newSceneObject.chunk_ID = currentDisplayList.at(i).m_ID;
+        newSceneObject.model_path = WCHARTToString(currentDisplayList.at(i).m_model_path);
+        newSceneObject.tex_diffuse_path =  WCHARTToString(currentDisplayList.at(i).m_texture_diffuse_path);
         newSceneObject.posX = currentDisplayList.at(i).m_position.x;
         newSceneObject.posY = currentDisplayList.at(i).m_position.y;
         newSceneObject.posZ = currentDisplayList.at(i).m_position.z;
@@ -200,7 +201,8 @@ void ToolMain::onActionSave()
         newSceneObject.scaX = currentDisplayList.at(i).m_scale.x;
         newSceneObject.scaY = currentDisplayList.at(i).m_scale.y;
         newSceneObject.scaZ = currentDisplayList.at(i).m_scale.z;
-		m_sceneGraph.push_back(newSceneObject);
+
+        m_sceneGraph.push_back(newSceneObject);
 	}//End for
 
 	sqlite3_stmt *pResults;

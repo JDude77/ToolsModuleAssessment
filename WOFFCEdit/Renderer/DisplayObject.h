@@ -10,6 +10,8 @@ public:
 	//Object mesh and diffuse texture
 	std::shared_ptr<DirectX::Model>	m_model;
 	ID3D11ShaderResourceView*		m_texture_diffuse;
+	std::wstring					m_model_path;
+	std::wstring					m_texture_diffuse_path;
 
 	//Object Information
 	int m_ID;
