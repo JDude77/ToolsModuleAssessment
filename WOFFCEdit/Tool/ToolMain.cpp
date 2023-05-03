@@ -180,6 +180,29 @@ void ToolMain::onActionLoad()
 
 void ToolMain::onActionSave()
 {
+	//Update the scene graph with the current data
+	m_sceneGraph.clear();
+	const std::vector<DisplayObject> currentDisplayList = m_d3dRenderer.GetDisplayList();
+
+	//Go through every member of the display list
+	for(int i = 0; i < currentDisplayList.size(); i++)
+	{
+		//Create a new scene object and assign all its values
+		SceneObject newSceneObject;
+		newSceneObject.ID = currentDisplayList.at(i).m_ID;
+        newSceneObject.chunk_ID = m_chunk.ID;
+        newSceneObject.posX = currentDisplayList.at(i).m_position.x;
+        newSceneObject.posY = currentDisplayList.at(i).m_position.y;
+        newSceneObject.posZ = currentDisplayList.at(i).m_position.z;
+        newSceneObject.rotX = currentDisplayList.at(i).m_orientation.x;
+        newSceneObject.rotY = currentDisplayList.at(i).m_orientation.y;
+        newSceneObject.rotZ = currentDisplayList.at(i).m_orientation.z;
+        newSceneObject.scaX = currentDisplayList.at(i).m_scale.x;
+        newSceneObject.scaY = currentDisplayList.at(i).m_scale.y;
+        newSceneObject.scaZ = currentDisplayList.at(i).m_scale.z;
+		m_sceneGraph.push_back(newSceneObject);
+	}//End for
+
 	sqlite3_stmt *pResults;
 
 	//Delete all in-world objects
@@ -349,7 +372,6 @@ void ToolMain::Tick(MSG *msg)
 	{
 		m_executeOnce = false;
 	}//End else if
-	
 
 	//Has something changed
 		//Update scenegraph

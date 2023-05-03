@@ -59,6 +59,7 @@ public:
 	void Paste();
 	void Undo();
 	void Redo();
+	const std::vector<DisplayObject>& GetDisplayList();
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -66,6 +67,8 @@ public:
 
 private:
 	void Update(DX::StepTimer const& timer);
+
+	void HighlightSelectedObject(int previousSelectedID, int newSelectedID) const;
 
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();

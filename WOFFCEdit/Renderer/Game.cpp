@@ -98,7 +98,8 @@ void Game::SetGridState(const bool state)
 #pragma region Functionality
 int Game::MousePicking() const
 {
-    int selectedID = -1;
+    static int selectedID = -1;
+    const int previousIDCache = selectedID;
     float pickingDistance = 0.0f;
     float shortestDistance = D3D11_FLOAT32_MAX;
 
@@ -187,6 +188,9 @@ int Game::MousePicking() const
         }//End for
     }//End for
 
+    //Highlight the selected object
+    HighlightSelectedObject(previousIDCache, selectedID);
+
     //Return the ID of the selected object
     return selectedID;
 }//End MousePicking
@@ -272,6 +276,11 @@ void Game::Redo()
     }//End if
 }//End Redo
 
+const std::vector<DisplayObject>& Game::GetDisplayList()
+{
+    return m_displayList;
+}//End GetDisplayList
+
 
 #pragma endregion
 
@@ -336,6 +345,40 @@ void Game::Update(DX::StepTimer const& timer)
     }//End if
 #endif
 }//End Update
+
+void Game::HighlightSelectedObject(const int previousSelectedID, const int newSelectedID) const
+{
+	//No change in highlighting status if our IDs match
+	if(previousSelectedID == newSelectedID) return;
+
+	//If we changed from a previous ID
+	if(previousSelectedID != -1)
+	{
+	    //Change the previous model's highlight back to normal
+	    m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
+	    {
+	        IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
+	        if(highlightEffect) highlightEffect->SetFogEnabled(false);
+	    });//End UpdateEffects lambda
+	}//End if
+
+	//If we have a valid new ID
+	if(newSelectedID != -1)
+	{
+	    //Change the new model's highlight to be activated
+	    m_displayList[newSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
+	    {
+	        IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
+	        if(highlightEffect)
+	        {
+	            highlightEffect->SetFogStart(0.0f);
+	            highlightEffect->SetFogEnd(0.0f);
+	            highlightEffect->SetFogColor(Colors::AliceBlue);
+	            highlightEffect->SetFogEnabled(true);
+	        }//End if
+	    });//End UpdateEffects lambda
+	}//End if
+}//End HighlightSelectedObject
 #pragma endregion
 
 #pragma region Frame Render
@@ -374,18 +417,27 @@ void Game::Render()
 	for (int i = 0; i < numRenderObjects; i++)
 	{
 		m_deviceResources->PIXBeginEvent(L"Draw Model");
-		const XMVECTORF32 scale = { m_displayList[i].m_scale.x,
-									m_displayList[i].m_scale.y,
-									m_displayList[i].m_scale.z };
+		const XMVECTORF32 scale =
+        {
+			m_displayList[i].m_scale.x,
+			m_displayList[i].m_scale.y,
+			m_displayList[i].m_scale.z
+        };
 
-		const XMVECTORF32 translate = { m_displayList[i].m_position.x,
-										m_displayList[i].m_position.y,
-										m_displayList[i].m_position.z };
+		const XMVECTORF32 translate =
+        {
+			m_displayList[i].m_position.x,
+			m_displayList[i].m_position.y,
+			m_displayList[i].m_position.z
+        };
 
 		//Convert degrees into radians for rotation matrix
-		const XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y *3.1415 / 180,
-		                                                           m_displayList[i].m_orientation.x *3.1415 / 180,
-		                                                           m_displayList[i].m_orientation.z *3.1415 / 180);
+		const XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll
+		(
+            m_displayList[i].m_orientation.y * PI_SHORT / 180,
+            m_displayList[i].m_orientation.x * PI_SHORT / 180,
+            m_displayList[i].m_orientation.z * PI_SHORT / 180
+        );
 
 		const XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
 
