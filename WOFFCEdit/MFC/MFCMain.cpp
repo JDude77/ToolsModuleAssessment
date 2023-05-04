@@ -11,7 +11,7 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_EDIT_CUT,					&MFCMain::MenuEditCut)
 	ON_COMMAND(ID_EDIT_PASTE,				&MFCMain::MenuEditPaste)
 	ON_COMMAND(ID_EDIT_DELETE,				&MFCMain::MenuEditDelete)
-	ON_COMMAND(ID_BUTTON40001,				&MFCMain::ToolBarSave)
+	ON_COMMAND(IDR_TOOLBAR_SAVE,			&MFCMain::ToolBarSave)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -41,9 +41,9 @@ BOOL MFCMain::InitInstance()
 	//Handle of directX child window
 	m_toolHandle = m_frame->m_directXView.GetSafeHwnd();
 	//Get the rect from the MFC window so we can get its dimensions
-	m_frame->m_directXView.GetClientRect(&windowRect);
-	m_width		= windowRect.Width();
-	m_height	= windowRect.Height();
+	m_frame->m_directXView.GetClientRect(&m_windowRect);
+	m_width		= m_windowRect.Width();
+	m_height	= m_windowRect.Height();
 
 	m_toolSystem.onActionInitialise(m_toolHandle, m_width, m_height);
 
@@ -80,7 +80,7 @@ int MFCMain::Run()
 			const int ID = m_toolSystem.getCurrentSelectionID();
 			
 			std::wstring statusString = ID != -1 ? L"Selected Object: " + std::to_wstring(ID) : L"Selected Object: NONE";
-			m_toolSystem.Tick(&msg);
+			m_toolSystem.Tick(&msg, m_toolSelectDialogue.m_active, m_toolSelectDialogue.m_startSelected);
 
 			//Send current object ID to status bar in the main frame
 			m_frame->m_wndStatusBar.SetPaneText(1, statusString.c_str(), 1);	
@@ -107,7 +107,8 @@ void MFCMain::MenuEditSelect()
 	//m_ToolSelectDialogue.DoModal();											//Start it up modal
 
 	//Modeless dialogue must be declared in the class - if we do local, it will go out of scope instantly and destroy itself
-	m_toolSelectDialogue.Create(IDD_DIALOG1);	//Start up modeless
+	m_toolSelectDialogue.Create(IDD_DIALOG_SELECT);	//Start up modeless
+	m_toolSelectDialogue.m_active = true;
 	m_toolSelectDialogue.ShowWindow(SW_SHOW);	//Show modeless
 	m_toolSelectDialogue.SetObjectData(&m_toolSystem.m_sceneGraph, &m_toolSystem.m_selectedObject);
 }//End MenuEditSelect

@@ -294,17 +294,6 @@ void Game::HighlightSelectedObject(const int previousSelectedID, const int newSe
 	//No change in highlighting status if our IDs match
 	if (previousSelectedID == newSelectedID) return;
 
-	//If we changed from a previous ID
-	if (previousSelectedID != -1)
-	{
-		//Change the previous model's highlight back to normal
-		m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
-			{
-				IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
-				if (highlightEffect) highlightEffect->SetFogEnabled(false);
-			});//End UpdateEffects lambda
-	}//End if
-
 	//If we have a valid new ID
 	if (newSelectedID != -1)
 	{
@@ -319,6 +308,17 @@ void Game::HighlightSelectedObject(const int previousSelectedID, const int newSe
 					highlightEffect->SetFogColor(Colors::AliceBlue);
 					highlightEffect->SetFogEnabled(true);
 				}//End if
+			});//End UpdateEffects lambda
+	}//End if
+
+	//If we changed from a previous ID
+	if (previousSelectedID != -1)
+	{
+		//Change the previous model's highlight back to normal
+		m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
+			{
+				IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
+				if (highlightEffect) highlightEffect->SetFogEnabled(false);
 			});//End UpdateEffects lambda
 	}//End if
 }//End HighlightSelectedObject

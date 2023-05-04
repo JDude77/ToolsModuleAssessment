@@ -26,12 +26,14 @@ protected:
 	afx_msg void Select();	//Item has been selected
 
 	std::vector<SceneObject> * m_sceneGraph{};
-	int * m_currentSelection{};
+	int* m_currentSelection{};
 
 	DECLARE_MESSAGE_MAP()
 public:
 	//Control variable for more efficient access of the listbox
 	CListBox m_listBox;
+	int m_startSelected;
+	BOOL m_active = false;
 	virtual BOOL OnInitDialog() override;
 	void PostNcDestroy() override;
 	afx_msg void OnBnClickedOk();

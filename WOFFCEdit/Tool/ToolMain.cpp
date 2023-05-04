@@ -321,14 +321,14 @@ void ToolMain::onActionDelete()
 	m_d3dRenderer.Delete(m_selectedObject);
 }//End onActionDelete
 
-void ToolMain::Tick(MSG *msg)
+void ToolMain::Tick(MSG *msg, const bool selectWindowOpen, const int selectWindowPreviousSelected)
 {
 	//Do we have a selection
 	//Do we have a mode
 	//Are we clicking/dragging/releasing
 	if(!m_executeOnce)
 	{
-		if(m_toolInputCommands.mousePickingActive)
+		if(!selectWindowOpen && m_toolInputCommands.mousePickingActive)
 		{
 			m_executeOnce = true;
 			m_selectedObject = m_d3dRenderer.MousePicking();
@@ -377,9 +377,15 @@ void ToolMain::Tick(MSG *msg)
 	}//End else if
 
 	//Hande moving a selected object
-	if(m_toolInputCommands.moveSelectedObject)
+	if(!selectWindowOpen && m_toolInputCommands.moveSelectedObject)
 	{
 		m_d3dRenderer.MoveSelectedObject(m_selectedObject);
+	}//End if
+
+	//Update the highlighted object when the select window is open
+	if(selectWindowOpen)
+	{
+		m_d3dRenderer.HighlightSelectedObject(selectWindowPreviousSelected, m_selectedObject);
 	}//End if
 
 	//Has something changed
@@ -419,7 +425,8 @@ void ToolMain::UpdateInput(const MSG* msg)
 		case WM_LBUTTONUP:
 			m_toolInputCommands.mousePickingActive = false;
 			m_toolInputCommands.moveSelectedObject = false;
-			m_d3dRenderer.MoveSelectedObjectEnd(m_selectedObject, m_selectedObject);
+			if(m_d3dRenderer.GetCurrentDragActive())
+				m_d3dRenderer.MoveSelectedObjectEnd(m_selectedObject, m_selectedObject);
 			break;
 
 		//Mouse right button down

@@ -54,6 +54,7 @@ public:
 	//Functionality
 	int MousePicking() const;
 	void MoveSelectedObject(int selectedID);
+	void HighlightSelectedObject(int previousSelectedID, int newSelectedID) const;
 	void MoveSelectedObjectEnd(int& selectedID, int movedObjectID);
 	void Delete(int& selectedID);
 	void Copy(int selectedID);
@@ -62,6 +63,7 @@ public:
 	void Undo(int previousSelectedID, const int& currentSelectedID);
 	void Redo(int previousSelectedID, const int& currentSelectedID);
 	const std::vector<DisplayObject>& GetDisplayList();
+	const bool& GetCurrentDragActive() const { return m_currentDragActive; }
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -70,7 +72,6 @@ public:
 private:
 	void Update(DX::StepTimer const& timer);
 
-	void HighlightSelectedObject(int previousSelectedID, int newSelectedID) const;
 
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();

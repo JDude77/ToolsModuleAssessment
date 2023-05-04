@@ -31,10 +31,11 @@ SelectDialogue::~SelectDialogue()
 }//End destructor
 
 //Pass through pointers to the data in the tool we want to manipulate
-void SelectDialogue::SetObjectData(std::vector<SceneObject>* sceneGraph, int * selection)
+void SelectDialogue::SetObjectData(std::vector<SceneObject>* sceneGraph, int* selection)
 {
 	m_sceneGraph = sceneGraph;
 	m_currentSelection = selection;
+	m_startSelected = *selection;
 
 	const int numSceneObjects = m_sceneGraph->size();
 	//Iterate through all the objects in the scene graph and put an entry for each in the listbox
@@ -42,6 +43,8 @@ void SelectDialogue::SetObjectData(std::vector<SceneObject>* sceneGraph, int * s
 	{
 		//Easily possible to make the data string presented more complex, showing other columns
 		std::wstring listBoxEntry = std::to_wstring(m_sceneGraph->at(i).ID);
+		listBoxEntry.append(L" - ");
+		listBoxEntry.append(m_sceneGraph->at(i).name.begin(), m_sceneGraph->at(i).name.end());
 		m_listBox.AddString(listBoxEntry.c_str());
 	}//End for
 }//End SetObjectData
@@ -56,17 +59,18 @@ void SelectDialogue::End()
 {
 	//Destroy the window properly, including the links and pointers created
 	//This is so the dialogue can start again
+	m_active = false;
 	DestroyWindow();
 }//End End
 
 void SelectDialogue::Select()
 {
 	const int index = m_listBox.GetCurSel();
-	CString currentSelectionValue;
+	//CString currentSelectionValue;
 	
-	m_listBox.GetText(index, currentSelectionValue);
-
-	*m_currentSelection = _ttoi(currentSelectionValue);
+	//m_listBox.GetText(index, currentSelectionValue);
+	m_startSelected = *m_currentSelection;
+	*m_currentSelection = index;
 }//End Select
 
 BOOL SelectDialogue::OnInitDialog()

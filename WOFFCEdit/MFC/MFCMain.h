@@ -23,8 +23,8 @@ private:
 	CMyFrame*		m_frame{};				//Handle to the frame where all our UI is
 	HWND			m_toolHandle{};			//Handle to the MFC window
 	ToolMain		m_toolSystem;			//Instance of Tool System that we interface to
-	CRect			windowRect;				//Window area rectangle
-	SelectDialogue	m_toolSelectDialogue;	//For modeless dialogue, declare it here
+	CRect			m_windowRect;			//Window area rectangle
+	SelectDialogue  m_toolSelectDialogue;	//For modeless dialogue, declare it here
 
 	int m_width{};		
 	int m_height{};

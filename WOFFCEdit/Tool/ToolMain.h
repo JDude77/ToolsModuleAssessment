@@ -29,7 +29,7 @@ public:
 	afx_msg void	onActionPaste();										//Paste an object
 	afx_msg void	onActionDelete();										//Delete an object
 
-	void	Tick(MSG* msg);
+	void	Tick(MSG* msg, bool selectWindowOpen, const int selectWindowPreviousSelected);
 	void	UpdateInput(const MSG* msg);
 
 private:	
