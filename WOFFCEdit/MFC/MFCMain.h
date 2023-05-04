@@ -39,7 +39,9 @@ private:
 	afx_msg void MenuEditCut();
 	afx_msg void MenuEditPaste();
 	afx_msg void MenuEditDelete();
+	afx_msg void MenuViewWireframe();
 	afx_msg	void ToolBarSave();
+	afx_msg void ToolBarWireframe();
 
 	//Required macro for message map functionality - one per class
 	DECLARE_MESSAGE_MAP()	

@@ -104,6 +104,11 @@ void Game::SetGridState(const bool state)
 }//End SetGridState
 
 #pragma region Functionality
+void Game::ToggleWireframe()
+{
+	m_wireframeMode = !m_wireframeMode;
+}//End ToggleWireframe
+
 int Game::MousePicking() const
 {
 	//Reset previous distance
@@ -577,6 +582,8 @@ void Game::Render()
 	    const int numRenderObjects = m_displayList.size();
 		for (int i = 0; i < numRenderObjects; i++)
 		{
+			m_displayList[i].m_wireframe = m_wireframeMode;
+
 			m_deviceResources->PIXBeginEvent(L"Draw Model");
 			const XMVECTORF32 scale =
 	        {
@@ -603,7 +610,7 @@ void Game::Render()
 			const XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
 
 			//Last variable in draw - make last boolean TRUE for wireframe mode
-			m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);
+			m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, m_displayList[i].m_wireframe);
 
 			m_deviceResources->PIXEndEvent();
 		}//End for
@@ -612,9 +619,7 @@ void Game::Render()
 	//RENDER TERRAIN
 	context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(m_states->DepthDefault(),0);
-	context->RSSetState(m_states->CullNone());
-    //Uncomment for wireframe
-	//context->RSSetState(m_states->Wireframe());		
+	context->RSSetState(m_wireframeMode ? m_states->Wireframe() : m_states->CullNone());
 
 	//Render the batch
 	//This is handled in the display chunk becuase it has the potential to get complex

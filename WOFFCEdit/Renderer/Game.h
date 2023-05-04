@@ -50,6 +50,7 @@ public:
 	void BuildDisplayChunk(const ChunkObject* sceneChunk);
 	void SaveDisplayChunk(ChunkObject* sceneChunk);
 	void ClearDisplayList();
+	void ToggleWireframe();
 
 	//Functionality
 	int MousePicking() const;
@@ -82,6 +83,7 @@ private:
 	std::vector<DisplayObject>		m_displayList{};
 	DisplayChunk					m_displayChunk;
 	InputCommands					m_inputCommands{};
+	bool							m_wireframeMode;
 
 	//Screen size
 	RECT							m_screenDimensions{};

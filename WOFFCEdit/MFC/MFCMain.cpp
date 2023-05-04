@@ -11,7 +11,9 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_EDIT_CUT,					&MFCMain::MenuEditCut)
 	ON_COMMAND(ID_EDIT_PASTE,				&MFCMain::MenuEditPaste)
 	ON_COMMAND(ID_EDIT_DELETE,				&MFCMain::MenuEditDelete)
-	ON_COMMAND(IDR_TOOLBAR_SAVE,			&MFCMain::ToolBarSave)
+	ON_COMMAND(ID_VIEW_WIREFRAME,			&MFCMain::MenuViewWireframe)
+	ON_COMMAND(ID_BUTTON_SAVE,				&MFCMain::ToolBarSave)
+	ON_COMMAND(ID_BUTTON_WIREFRAME,			&MFCMain::ToolBarWireframe)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -143,10 +145,20 @@ void MFCMain::MenuEditDelete()
 	m_toolSystem.onActionDelete();
 }//End MenuEditDelete
 
+void MFCMain::MenuViewWireframe()
+{
+	m_toolSystem.onActionWireframe();
+}//End MenuViewWireframe
+
 void MFCMain::ToolBarSave()
 {
 	m_toolSystem.onActionSave();
-}//End ToolBarButton1
+}//End ToolBarSave
+
+void MFCMain::ToolBarWireframe()
+{
+	m_toolSystem.onActionWireframe();
+}//End ToolBarWireframe
 
 MFCMain::MFCMain()
 {

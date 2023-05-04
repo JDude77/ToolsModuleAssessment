@@ -321,6 +321,11 @@ void ToolMain::onActionDelete()
 	m_d3dRenderer.Delete(m_selectedObject);
 }//End onActionDelete
 
+void ToolMain::onActionWireframe()
+{
+	m_d3dRenderer.ToggleWireframe();
+}//End onActionWireframe
+
 void ToolMain::Tick(MSG *msg, const bool selectWindowOpen, const int selectWindowPreviousSelected)
 {
 	//Do we have a selection

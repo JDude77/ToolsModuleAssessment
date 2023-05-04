@@ -170,7 +170,8 @@
     <ClInclude Include="Tool\Commands\MoveObjectCommand.h">
       <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
-	<ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -181,6 +182,9 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="Resources\toolbarsave.bmp">
       <Filter>Resource Files</Filter>
     </Image>

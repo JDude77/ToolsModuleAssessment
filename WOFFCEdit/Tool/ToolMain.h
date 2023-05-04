@@ -28,6 +28,7 @@ public:
 	afx_msg void	onActionCut();											//Cut an object
 	afx_msg void	onActionPaste();										//Paste an object
 	afx_msg void	onActionDelete();										//Delete an object
+	afx_msg void	onActionWireframe();									//Toggle wireframe rendering
 
 	void	Tick(MSG* msg, bool selectWindowOpen, const int selectWindowPreviousSelected);
 	void	UpdateInput(const MSG* msg);

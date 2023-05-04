@@ -187,7 +187,7 @@
     <ClCompile Include="Tool\ToolMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-	<ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="Tool\Commands\MoveObjectCommand.h" />
     <ClInclude Include="Tool\Commands\DeleteCommand.h" />
     <ClInclude Include="Tool\Commands\PasteCommand.h" />
@@ -223,6 +223,7 @@
     <ResourceCompile Include="Win32SimpleSample.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\toolbar.bmp" />
     <Image Include="Resources\toolbarsave.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
