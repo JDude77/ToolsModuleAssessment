@@ -18,9 +18,15 @@ void PasteCommand::Execute()
     //Get DXSDK to load model
     //Set final boolean to "false" for left-handed coordinate system (Maya)
 	newDisplayObject.m_model = DirectX::Model::CreateFromCMO(m_deviceResources->GetD3DDevice(), m_objectToPaste.m_model_path.c_str(), *m_fxFactory, true);	
-    
+
+    //Save the model path for completeness
+	newDisplayObject.m_model_path = m_objectToPaste.m_model_path;
+
     //Load diffuse texture into shader resource
 	const HRESULT rs = DirectX::CreateDDSTextureFromFile(m_deviceResources->GetD3DDevice(), m_objectToPaste.m_texture_diffuse_path.c_str(), nullptr, &newDisplayObject.m_texture_diffuse);	
+
+    //Save the texture path for completeness
+	newDisplayObject.m_texture_diffuse_path = m_objectToPaste.m_texture_diffuse_path;
 
 	//If texture loading fails, load error default
 	if (rs)
