@@ -8,11 +8,15 @@
 #include "../Tool/Commands/DeleteCommand.h"
 #include "../Tool/Commands/CutCommand.h"
 #include "../Tool/Commands/PasteCommand.h"
+#include "../Tool/Commands/MoveObjectCommand.h"
 #include <string>
 
 using namespace DirectX;
 using namespace SimpleMath;
 using Microsoft::WRL::ComPtr;
+
+float Game::m_previousDistance;
+Vector3 Game::m_dragStartPosition;
 
 #ifndef PI_LONG
 /**
@@ -28,11 +32,15 @@ constexpr auto PI_LONG = 3.14159265358979323846264338327950288419716939937510f;
 constexpr auto PI_SHORT = 3.14159f;
 #endif
 
-Game::Game() : m_camera(std::make_unique<Camera>())
+Game::Game() : m_camera(std::make_unique<Camera>()), m_commandStack(std::stack<Command*>()), m_redoStack(std::stack<Command*>())
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_deviceResources->RegisterDeviceNotify(this);
 	m_displayList.clear();
+
+	m_previousDistance = -D3D11_FLOAT32_MAX;
+	m_currentDragActive = false;
+	m_dragStartPosition = Vector3::Zero;
 	
 	//Initial settings
 	//Modes
@@ -98,190 +106,387 @@ void Game::SetGridState(const bool state)
 #pragma region Functionality
 int Game::MousePicking() const
 {
-    static int selectedID = -1;
-    const int previousIDCache = selectedID;
-    float pickingDistance = 0.0f;
-    float shortestDistance = D3D11_FLOAT32_MAX;
+	//Reset previous distance
+	m_previousDistance = -D3D11_FLOAT32_MAX;
 
-    //Set up selection near and far planes
-    const XMVECTOR nearPlane    = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 0.0f, 1.0f);
-    const XMVECTOR farPlane     = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 1.0f, 1.0f);
+	static int selectedID = -1;
+	const int previousIDCache = selectedID;
+	float pickingDistance = 0.0f;
+	float shortestDistance = D3D11_FLOAT32_MAX;
 
-    //Loop through the object display list and check each to pick
-    for(int id = 0; id < m_displayList.size(); id++)
-    {
-	    //Get object translation, scale, and rotation
-        const XMVECTORF32 translation =
-        {
-            m_displayList[id].m_position.x,
-            m_displayList[id].m_position.y,
-            m_displayList[id].m_position.z
-        };
-        const XMVECTORF32 scale =
-        {
-            m_displayList[id].m_scale.x,
-            m_displayList[id].m_scale.y,
-            m_displayList[id].m_scale.z
-        };
-	    const XMVECTOR rotation = Quaternion::CreateFromYawPitchRoll
-    	(
+	//Set up selection near and far planes
+	const XMVECTOR nearPlane =	XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 0.0f, 1.0f);
+	const XMVECTOR farPlane =	XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 1.0f, 1.0f);
+
+	//Loop through the object display list and check each to pick
+	for (int id = 0; id < m_displayList.size(); id++)
+	{
+		//Get object translation, scale, and rotation
+		const XMVECTORF32 translation =
+		{
+			m_displayList[id].m_position.x,
+			m_displayList[id].m_position.y,
+			m_displayList[id].m_position.z
+		};
+		const XMVECTORF32 scale =
+		{
+			m_displayList[id].m_scale.x,
+			m_displayList[id].m_scale.y,
+			m_displayList[id].m_scale.z
+		};
+		const XMVECTOR rotation = Quaternion::CreateFromYawPitchRoll
+		(
 			m_displayList[id].m_orientation.y * PI_SHORT / 180.0f,
-            m_displayList[id].m_orientation.x * PI_SHORT / 180.0f,
-            m_displayList[id].m_orientation.z * PI_SHORT / 180.0f
-        );
+			m_displayList[id].m_orientation.x * PI_SHORT / 180.0f,
+			m_displayList[id].m_orientation.z * PI_SHORT / 180.0f
+		);
 
-        //Construct the matrix of the object in the world
-        XMMATRIX objectTransformMatrix = m_world * XMMatrixTransformation
-    	(
-            g_XMZero,
-            Quaternion::Identity,
-            scale,
-            g_XMZero,
-            rotation,
-            translation
-        );
+		//Construct the matrix of the object in the world
+		XMMATRIX objectTransformMatrix = m_world * XMMatrixTransformation
+		(
+			g_XMZero,
+			Quaternion::Identity,
+			scale,
+			g_XMZero,
+			rotation,
+			translation
+		);
 
-        //Unproject the points on the near/far plane using the object matrix
-        const XMVECTOR nearPoint = XMVector3Unproject
-    	(
+		//Unproject the points on the near/far plane using the object matrix
+		const XMVECTOR nearPoint = XMVector3Unproject
+		(
 			nearPlane,
-            0.0f,
-            0.0f,
-            m_screenDimensions.right,
-            m_screenDimensions.bottom,
-            m_deviceResources->GetScreenViewport().MinDepth,
-            m_deviceResources->GetScreenViewport().MaxDepth,
-            m_projection,
-            m_view,
-            objectTransformMatrix
-        );
-        const XMVECTOR farPoint = XMVector3Unproject
-    	(
+			0.0f,
+			0.0f,
+			m_screenDimensions.right,
+			m_screenDimensions.bottom,
+			m_deviceResources->GetScreenViewport().MinDepth,
+			m_deviceResources->GetScreenViewport().MaxDepth,
+			m_projection,
+			m_view,
+			objectTransformMatrix
+		);
+		const XMVECTOR farPoint = XMVector3Unproject
+		(
 			farPlane,
-            0.0f,
-            0.0f,
-            m_screenDimensions.right,
-            m_screenDimensions.bottom,
-            m_deviceResources->GetScreenViewport().MinDepth,
-            m_deviceResources->GetScreenViewport().MaxDepth,
-            m_projection,
-            m_view,
-            objectTransformMatrix
-        );
+			0.0f,
+			0.0f,
+			m_screenDimensions.right,
+			m_screenDimensions.bottom,
+			m_deviceResources->GetScreenViewport().MinDepth,
+			m_deviceResources->GetScreenViewport().MaxDepth,
+			m_projection,
+			m_view,
+			objectTransformMatrix
+		);
 
-        //Transform the points into the picking vector
-        XMVECTOR pickingVector = farPoint - nearPoint;
-        pickingVector = XMVector3Normalize(pickingVector);
+		//Transform the points into the picking vector
+		XMVECTOR pickingVector = farPoint - nearPoint;
+		pickingVector = XMVector3Normalize(pickingVector);
 
-        //Loop through the object's mesh list
-        auto& objectMeshList = m_displayList[id].m_model.get()->meshes;
-        for(int meshIndex = 0; meshIndex < objectMeshList.size(); meshIndex++)
-        {
-	        if(objectMeshList[meshIndex]->boundingBox.Intersects(nearPoint, pickingVector, pickingDistance))
-	        {
-                if(pickingDistance < shortestDistance)
-                {
-                    shortestDistance = pickingDistance;
+		//Loop through the object's mesh list
+		auto& objectMeshList = m_displayList[id].m_model.get()->meshes;
+		for (int meshIndex = 0; meshIndex < objectMeshList.size(); meshIndex++)
+		{
+			if (objectMeshList[meshIndex]->boundingBox.Intersects(nearPoint, pickingVector, pickingDistance))
+			{
+				if (pickingDistance < shortestDistance)
+				{
+					shortestDistance = pickingDistance;
 					selectedID = id;
-                }//End if
-	        }//End if
-        }//End for
-    }//End for
+				}//End if
+			}//End if
+		}//End for
+	}//End for
 
-    //Highlight the selected object
-    HighlightSelectedObject(previousIDCache, selectedID);
+	//Highlight the selected object
+	HighlightSelectedObject(previousIDCache, selectedID);
 
-    //Return the ID of the selected object
-    return selectedID;
+	//Return the ID of the selected object
+	return selectedID;
 }//End MousePicking
 
 void Game::Delete(int& selectedID)
 {
-    //Can't delete if nothing is selected
-    if(selectedID == -1) return;
+	//Can't delete if nothing is selected
+	if (selectedID == -1) return;
 
-    //Create new delete command and push it to the command stack
-    Command* newDeletion = new DeleteCommand(m_displayList, selectedID, m_displayList[selectedID]);
-    m_commandStack.push(newDeletion);
+	//Create new delete command and push it to the command stack
+	Command* newDeletion = new DeleteCommand(m_displayList, selectedID, m_displayList[selectedID]);
+	m_commandStack.push(newDeletion);
 
-    //Execute the deletion
-    newDeletion->Execute();
+	//Execute the deletion
+	newDeletion->Execute();
 
-    //Clear the redo stack from the new command invalidating it
-    while(!m_redoStack.empty()) m_redoStack.pop();
+	//Clear the redo stack from the new command invalidating it
+	while (!m_redoStack.empty()) m_redoStack.pop();
 }//End Delete
 
 void Game::Copy(const int selectedID)
 {
-    //Can't copy if nothing is selected
-    if(selectedID == -1) return;
+	//Can't copy if nothing is selected
+	if (selectedID == -1) return;
 
-    m_objectToCopy = m_displayList[selectedID];
+	m_objectToCopy = m_displayList[selectedID];
 }//End Copy
 
 void Game::Cut(int& selectedID)
 {
-    //Can't cut if nothing is selected
-    if(selectedID == -1) return;
+	//Can't cut if nothing is selected
+	if (selectedID == -1) return;
 
-    //Set the object to copy
-    m_objectToCopy = m_displayList[selectedID];
+	//Set the object to copy
+	m_objectToCopy = m_displayList[selectedID];
 
-    //Create new cut command and push it to the command stack
-    Command* newCut = new CutCommand(m_displayList, selectedID, m_objectToCopy);
-    m_commandStack.push(newCut);
+	//Create new cut command and push it to the command stack
+	Command* newCut = new CutCommand(m_displayList, selectedID, m_objectToCopy);
+	m_commandStack.push(newCut);
 
-    //Execute the cut
-    newCut->Execute();
+	//Execute the cut
+	newCut->Execute();
 
-    //Clear the redo stack from the new command invalidating it
-    while(!m_redoStack.empty()) m_redoStack.pop();
+	//Clear the redo stack from the new command invalidating it
+	while (!m_redoStack.empty()) m_redoStack.pop();
 }//End Cut
 
 void Game::Paste()
 {
-    //Can't paste if we don't have anything to paste
-    if(m_objectToCopy.m_model == nullptr) return;
+	//Can't paste if we don't have anything to paste
+	if (m_objectToCopy.m_model == nullptr) return;
 
-    //Create new paste command and push it to the command stack
-    Command* newPaste = new PasteCommand(m_displayList, m_objectToCopy, m_deviceResources);
-    m_commandStack.push(newPaste);
+	//Create new paste command and push it to the command stack
+	Command* newPaste = new PasteCommand(m_displayList, m_objectToCopy, m_deviceResources);
+	m_commandStack.push(newPaste);
 
-    //Execute the paste
-    newPaste->Execute();
+	//Execute the paste
+	newPaste->Execute();
 
-    //Clear the redo stack from the new command invalidating it
-    while(!m_redoStack.empty()) m_redoStack.pop();
+	//Clear the redo stack from the new command invalidating it
+	while (!m_redoStack.empty()) m_redoStack.pop();
 }//End Paste
 
-void Game::Undo()
+void Game::Undo(const int previousSelectedID, const int& currentSelectedID)
 {
-    //Can't undo if there's no commands to undo
-    if(!m_commandStack.empty())
-    {
-	    m_commandStack.top()->Undo();
-        m_redoStack.push(m_commandStack.top());
-        m_commandStack.pop();
-    }//End if
+	//Can't undo if there's no commands to undo
+	if (!m_commandStack.empty())
+	{
+		m_commandStack.top()->Undo();
+		m_redoStack.push(m_commandStack.top());
+		m_commandStack.pop();
+		HighlightSelectedObject(previousSelectedID, currentSelectedID);
+	}//End if
 }//End Undo
 
-void Game::Redo()
+void Game::Redo(const int previousSelectedID, const int& currentSelectedID)
 {
-    //Can't redo if there's no commands to redo
-    if(!m_redoStack.empty())
-    {
-	    m_redoStack.top()->Execute();
-        m_commandStack.push(m_redoStack.top());
-        m_redoStack.pop();
-    }//End if
+	//Can't redo if there's no commands to redo
+	if (!m_redoStack.empty())
+	{
+		m_redoStack.top()->Execute();
+		m_commandStack.push(m_redoStack.top());
+		m_redoStack.pop();
+		HighlightSelectedObject(previousSelectedID, currentSelectedID);
+	}//End if
 }//End Redo
+
+void Game::HighlightSelectedObject(const int previousSelectedID, const int newSelectedID) const
+{
+	//No change in highlighting status if our IDs match
+	if (previousSelectedID == newSelectedID) return;
+
+	//If we changed from a previous ID
+	if (previousSelectedID != -1)
+	{
+		//Change the previous model's highlight back to normal
+		m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
+			{
+				IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
+				if (highlightEffect) highlightEffect->SetFogEnabled(false);
+			});//End UpdateEffects lambda
+	}//End if
+
+	//If we have a valid new ID
+	if (newSelectedID != -1)
+	{
+		//Change the new model's highlight to be activated
+		m_displayList[newSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
+			{
+				IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
+				if (highlightEffect)
+				{
+					highlightEffect->SetFogStart(0.0f);
+					highlightEffect->SetFogEnd(0.0f);
+					highlightEffect->SetFogColor(Colors::AliceBlue);
+					highlightEffect->SetFogEnabled(true);
+				}//End if
+			});//End UpdateEffects lambda
+	}//End if
+}//End HighlightSelectedObject
+
+void Game::MoveSelectedObject(const int selectedID)
+{
+    //Can't move the object if there's no object to move
+	if(selectedID == -1) return;
+
+	//If this is the first frame of moving the object
+	if(!m_currentDragActive)
+	{
+		//Log the start position before anything moves
+		m_dragStartPosition = m_displayList[selectedID].m_position;
+		m_currentDragActive = true;
+	}//End if
+
+	//Set up distance float to log distance
+	float distance = 0;
+
+    //Set up movement near and far planes
+    const XMVECTOR nearPlane    = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 0.0f, 1.0f);
+    const XMVECTOR farPlane     = XMVectorSet(m_inputCommands.mouseX, m_inputCommands.mouseY, 1.0f, 1.0f);
+
+	//Unproject the points on the near/far plane using the world matrix
+	const XMVECTOR nearPoint = XMVector3Unproject
+	(
+		nearPlane,
+		0.0f,
+		0.0f,
+		m_screenDimensions.right,
+		m_screenDimensions.bottom,
+		m_deviceResources->GetScreenViewport().MinDepth,
+		m_deviceResources->GetScreenViewport().MaxDepth,
+		m_projection,
+		m_view,
+		m_world
+	);
+	const XMVECTOR farPoint = XMVector3Unproject
+	(
+		farPlane,
+		0.0f,
+		0.0f,
+		m_screenDimensions.right,
+		m_screenDimensions.bottom,
+		m_deviceResources->GetScreenViewport().MinDepth,
+		m_deviceResources->GetScreenViewport().MaxDepth,
+		m_projection,
+		m_view,
+		m_world
+	);
+
+	//Get vector pointing to the position in world space
+	XMVECTOR mouseToWorld = farPoint - nearPoint;
+	mouseToWorld = XMVector3Normalize(mouseToWorld);
+	if(m_previousDistance <= -D3D11_FLOAT32_MAX)
+	{
+		//Get object translation, scale, and rotation
+		const XMVECTORF32 translation =
+		{
+			m_displayList[selectedID].m_position.x,
+			m_displayList[selectedID].m_position.y,
+			m_displayList[selectedID].m_position.z
+		};
+		const XMVECTORF32 scale =
+		{
+			m_displayList[selectedID].m_scale.x,
+			m_displayList[selectedID].m_scale.y,
+			m_displayList[selectedID].m_scale.z
+		};
+		const XMVECTOR rotation = Quaternion::CreateFromYawPitchRoll
+		(
+			m_displayList[selectedID].m_orientation.y * PI_SHORT / 180.0f,
+			m_displayList[selectedID].m_orientation.x * PI_SHORT / 180.0f,
+			m_displayList[selectedID].m_orientation.z * PI_SHORT / 180.0f
+		);
+
+		//Construct the matrix of the object in the world
+		XMMATRIX objectTransformMatrix = m_world * XMMatrixTransformation
+		(
+			g_XMZero,
+			Quaternion::Identity,
+			scale,
+			g_XMZero,
+			rotation,
+			translation
+		);
+
+		//Unproject the points on the near/far plane using the object matrix
+		const XMVECTOR objectNearPoint = XMVector3Unproject
+		(
+			nearPlane,
+			0.0f,
+			0.0f,
+			m_screenDimensions.right,
+			m_screenDimensions.bottom,
+			m_deviceResources->GetScreenViewport().MinDepth,
+			m_deviceResources->GetScreenViewport().MaxDepth,
+			m_projection,
+			m_view,
+			objectTransformMatrix
+		);
+		const XMVECTOR objectFarPoint = XMVector3Unproject
+		(
+			farPlane,
+			0.0f,
+			0.0f,
+			m_screenDimensions.right,
+			m_screenDimensions.bottom,
+			m_deviceResources->GetScreenViewport().MinDepth,
+			m_deviceResources->GetScreenViewport().MaxDepth,
+			m_projection,
+			m_view,
+			objectTransformMatrix
+		);
+
+		//Get the vector from the camera to the object
+		XMVECTOR objectCameraToWorldVector = objectFarPoint - objectNearPoint;
+		objectCameraToWorldVector = XMVector3Normalize(objectCameraToWorldVector);
+
+		//Loop through the object's mesh list
+	    std::vector<std::shared_ptr<ModelMesh>>& objectMeshList = m_displayList[selectedID].m_model.get()->meshes;
+		for (int meshIndex = 0; meshIndex < objectMeshList.size(); meshIndex++)
+		{
+			objectMeshList[meshIndex]->boundingBox.Intersects(objectNearPoint, objectCameraToWorldVector, distance);
+			if(distance < m_previousDistance)
+			{
+				distance = m_previousDistance;
+			}//End if
+		}//End for
+
+		m_previousDistance = distance;
+	}//End if
+	else
+	{
+		distance = m_previousDistance;
+	}//End else
+
+	//Set the position of the selected object
+	Vector3 objectPosition = nearPoint + mouseToWorld * distance;
+	m_displayList[selectedID].m_position = objectPosition;
+}//End MoveSelectedObject
+
+void Game::MoveSelectedObjectEnd(int& selectedID, int movedObjectID)
+{
+	//We didn't actually move an object if the ID isn't valid
+	if(movedObjectID == -1) return;
+
+	//Get the ID of the object that just moved
+	DisplayObject* movedObject = &m_displayList[selectedID];
+
+	//Create a movement command for undo/redo support, passing in the start and final positions
+	Command* newMoveObject = new MoveObjectCommand(selectedID, movedObjectID, movedObject->m_position, m_dragStartPosition, m_displayList[movedObjectID].m_position);
+
+	//Add the movement command to the command stack
+	m_commandStack.push(newMoveObject);
+
+	//Reset the drag start position here to be safe
+	m_dragStartPosition = Vector3::Zero;
+
+	//Set the boolean to say we're done with one drag
+	m_currentDragActive = false;
+}//End MoveSelectedObjectEnd
 
 const std::vector<DisplayObject>& Game::GetDisplayList()
 {
     return m_displayList;
 }//End GetDisplayList
-
-
 #pragma endregion
 
 #pragma region Frame Update
@@ -345,40 +550,6 @@ void Game::Update(DX::StepTimer const& timer)
     }//End if
 #endif
 }//End Update
-
-void Game::HighlightSelectedObject(const int previousSelectedID, const int newSelectedID) const
-{
-	//No change in highlighting status if our IDs match
-	if(previousSelectedID == newSelectedID) return;
-
-	//If we changed from a previous ID
-	if(previousSelectedID != -1)
-	{
-	    //Change the previous model's highlight back to normal
-	    m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
-	    {
-	        IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
-	        if(highlightEffect) highlightEffect->SetFogEnabled(false);
-	    });//End UpdateEffects lambda
-	}//End if
-
-	//If we have a valid new ID
-	if(newSelectedID != -1)
-	{
-	    //Change the new model's highlight to be activated
-	    m_displayList[newSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
-	    {
-	        IEffectFog* highlightEffect = dynamic_cast<IEffectFog*>(objectEffect);
-	        if(highlightEffect)
-	        {
-	            highlightEffect->SetFogStart(0.0f);
-	            highlightEffect->SetFogEnd(0.0f);
-	            highlightEffect->SetFogColor(Colors::AliceBlue);
-	            highlightEffect->SetFogEnabled(true);
-	        }//End if
-	    });//End UpdateEffects lambda
-	}//End if
-}//End HighlightSelectedObject
 #pragma endregion
 
 #pragma region Frame Render
@@ -390,6 +561,7 @@ void Game::Render()
 
     Clear();
 
+    //Render the main geometry
     m_deviceResources->PIXBeginEvent(L"Render");
 	    const auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -448,7 +620,8 @@ void Game::Render()
 	//This is handled in the display chunk becuase it has the potential to get complex
 	m_displayChunk.RenderBatch(m_deviceResources);
 
-    m_deviceResources->PIXBeginEvent(L"HUD");
+    //Render the UI
+    m_deviceResources->PIXBeginEvent(L"UI");
 	    //CAMERA POSITION ON HUD
 		m_sprites->Begin();
 		    const std::wstring cameraPositionText =
@@ -461,6 +634,7 @@ void Game::Render()
 		m_sprites->End();
     m_deviceResources->PIXEndEvent();
 
+    //Show everything on the screen
     m_deviceResources->Present();
 }//End Render
 
@@ -678,8 +852,8 @@ void Game::NewAudioDevice()
 //These are the resources that depend on the device
 void Game::CreateDeviceDependentResources()
 {
-    auto context = m_deviceResources->GetD3DDeviceContext();
-    auto device = m_deviceResources->GetD3DDevice();
+	ID3D11DeviceContext* context = m_deviceResources->GetD3DDeviceContext();
+    ID3D11Device* device = m_deviceResources->GetD3DDevice();
 
     m_states = std::make_unique<CommonStates>(device);
 
@@ -710,8 +884,6 @@ void Game::CreateDeviceDependentResources()
 
     m_font = std::make_unique<SpriteFont>(device, L"Resources/SegoeUI_18.spritefont");
 
-	//m_shape = GeometricPrimitive::CreateTeapot(context, 4.f, 8);
-
     //SDKMESH has to use clockwise winding with right-handed coordinates, so textures are flipped in the U-axis
     m_model = Model::CreateFromSDKMESH(device, L"Resources/tiny.sdkmesh", *m_fxFactory);
 	
@@ -728,7 +900,7 @@ void Game::CreateDeviceDependentResources()
 //Allocate all memory resources that change on a window SizeChanged event
 void Game::CreateWindowSizeDependentResources()
 {
-	const auto size = m_deviceResources->GetOutputSize();
+	const RECT size = m_deviceResources->GetOutputSize();
 	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
     float fovAngleY = 70.0f * XM_PI / 180.0f;
 

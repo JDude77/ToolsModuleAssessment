@@ -17,6 +17,7 @@ struct InputCommands
 	bool activateCameraMovement;
 	//Intended to be left-click
 	bool mousePickingActive;
+	bool moveSelectedObject;
 
 	//Mouse position tracking
 	float mouseX;

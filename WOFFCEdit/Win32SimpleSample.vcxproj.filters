@@ -98,6 +98,9 @@
     <ClCompile Include="Tool\Commands\DeleteCommand.cpp">
       <Filter>Tool\Source\Commands</Filter>
     </ClCompile>
+    <ClCompile Include="Tool\Commands\MoveObjectCommand.cpp">
+      <Filter>Tool\Source\Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SQLITE\sqlite3.h">
@@ -162,6 +165,9 @@
       <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
     <ClInclude Include="Tool\Commands\DeleteCommand.h">
+      <Filter>Tool\Header\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Commands\MoveObjectCommand.h">
       <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
   </ItemGroup>

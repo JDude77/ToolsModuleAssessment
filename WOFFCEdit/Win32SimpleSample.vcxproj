@@ -165,6 +165,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Tool\Commands\MoveObjectCommand.cpp" />
     <ClCompile Include="Tool\Commands\DeleteCommand.cpp" />
     <ClCompile Include="Tool\Commands\PasteCommand.cpp" />
     <ClCompile Include="Tool\Commands\Command.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="Tool\ToolMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Tool\Commands\MoveObjectCommand.h" />
     <ClInclude Include="Tool\Commands\DeleteCommand.h" />
     <ClInclude Include="Tool\Commands\PasteCommand.h" />
     <ClInclude Include="Tool\Commands\Command.h" />

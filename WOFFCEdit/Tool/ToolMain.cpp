@@ -21,6 +21,7 @@ ToolMain::ToolMain()
 	m_toolInputCommands.rotLeft					= false;
 	m_toolInputCommands.rotRight				= false;
 	m_toolInputCommands.activateCameraMovement	= false;
+	m_toolInputCommands.moveSelectedObject		= false;
 	m_toolInputCommands.mousePickingActive		= false;
 	m_toolInputCommands.copy					= false;
 	m_toolInputCommands.cut						= false;
@@ -292,12 +293,12 @@ void ToolMain::onActionSaveTerrain()
 
 void ToolMain::onActionUndo()
 {
-	m_d3dRenderer.Undo();
+	m_d3dRenderer.Undo(m_selectedObject, m_selectedObject);
 }//End onActionUndo
 
 void ToolMain::onActionRedo()
 {
-	m_d3dRenderer.Redo();
+	m_d3dRenderer.Redo(m_selectedObject, m_selectedObject);
 }//End onActionRedo
 
 void ToolMain::onActionCopy()
@@ -361,19 +362,25 @@ void ToolMain::Tick(MSG *msg)
 		if(m_toolInputCommands.undo)
 		{
 			m_executeOnce = true;
-			m_d3dRenderer.Undo();
+			m_d3dRenderer.Undo(m_selectedObject, m_selectedObject);
 		}//End if
 
 		if(m_toolInputCommands.redo)
 		{
 			m_executeOnce = true;
-			m_d3dRenderer.Redo();
+			m_d3dRenderer.Redo(m_selectedObject, m_selectedObject);
 		}//End if
 	}//End if
 	else if(!(m_toolInputCommands.redo || m_toolInputCommands.undo || m_toolInputCommands.paste || m_toolInputCommands.copy || m_toolInputCommands.cut || m_toolInputCommands.deleteObject || m_toolInputCommands.mousePickingActive))
 	{
 		m_executeOnce = false;
 	}//End else if
+
+	//Hande moving a selected object
+	if(m_toolInputCommands.moveSelectedObject)
+	{
+		m_d3dRenderer.MoveSelectedObject(m_selectedObject);
+	}//End if
 
 	//Has something changed
 		//Update scenegraph
@@ -405,11 +412,14 @@ void ToolMain::UpdateInput(const MSG* msg)
 		//Mouse left button down
 		case WM_LBUTTONDOWN:
 			m_toolInputCommands.mousePickingActive = true;
+			m_toolInputCommands.moveSelectedObject = true;
 			break;
 
 		//Mouse left button up
 		case WM_LBUTTONUP:
 			m_toolInputCommands.mousePickingActive = false;
+			m_toolInputCommands.moveSelectedObject = false;
+			m_d3dRenderer.MoveSelectedObjectEnd(m_selectedObject, m_selectedObject);
 			break;
 
 		//Mouse right button down

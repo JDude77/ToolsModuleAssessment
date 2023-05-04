@@ -53,12 +53,14 @@ public:
 
 	//Functionality
 	int MousePicking() const;
+	void MoveSelectedObject(int selectedID);
+	void MoveSelectedObjectEnd(int& selectedID, int movedObjectID);
 	void Delete(int& selectedID);
 	void Copy(int selectedID);
 	void Cut(int& selectedID);
 	void Paste();
-	void Undo();
-	void Redo();
+	void Undo(int previousSelectedID, const int& currentSelectedID);
+	void Redo(int previousSelectedID, const int& currentSelectedID);
 	const std::vector<DisplayObject>& GetDisplayList();
 
 #ifdef DXTK_AUDIO
@@ -84,14 +86,19 @@ private:
 	RECT							m_screenDimensions{};
 	
 	//Camera
-	std::unique_ptr<Camera>			m_camera;
+	std::unique_ptr<Camera>			m_camera{};
 
 	//Copy/paste
 	DisplayObject					m_objectToCopy;
 
 	//Undo/redo
-	std::stack<Command*>	m_commandStack;
-	std::stack<Command*>	m_redoStack;
+	std::stack<Command*>			m_commandStack{};
+	std::stack<Command*>			m_redoStack{};
+
+	//Object movement with mouse
+	static float							m_previousDistance;
+	bool									m_currentDragActive;
+	static DirectX::SimpleMath::Vector3		m_dragStartPosition;
 
 	//Control variables
 	//Grid rendering on/off
