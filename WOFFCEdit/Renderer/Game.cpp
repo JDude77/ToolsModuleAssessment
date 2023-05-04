@@ -391,61 +391,50 @@ void Game::Render()
     Clear();
 
     m_deviceResources->PIXBeginEvent(L"Render");
-    const auto context = m_deviceResources->GetD3DDeviceContext();
+	    const auto context = m_deviceResources->GetD3DDeviceContext();
 
-	if (m_grid)
-	{
-		//Draw procedurally-generated dynamic grid
-		const XMVECTORF32 xAxis = { 512.f, 0.f, 0.f };
-		const XMVECTORF32 yAxis = { 0.f, 0.f, 512.f };
-		DrawGrid(xAxis, yAxis, g_XMZero, 512, 512, Colors::Gray);
-	}//End if
+		if (m_grid)
+		{
+			//Draw procedurally-generated dynamic grid
+			const XMVECTORF32 xAxis = { 512.f, 0.f, 0.f };
+			const XMVECTORF32 yAxis = { 0.f, 0.f, 512.f };
+			DrawGrid(xAxis, yAxis, g_XMZero, 512, 512, Colors::Gray);
+		}//End if
 
-	//CAMERA POSITION ON HUD
-	m_sprites->Begin();
-    const std::wstring cameraPositionText =
-        L"Cam X: " + std::to_wstring(m_camera->m_camPosition.x) +
-        L"            " +
-        L"Cam Y: " + std::to_wstring(m_camera->m_camPosition.y) +
-        L"            " +
-        L"Cam Z: " + std::to_wstring(m_camera->m_camPosition.z);
-	m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::White);
-	m_sprites->End();
+		//RENDER OBJECTS FROM SCENEGRAPH
+	    const int numRenderObjects = m_displayList.size();
+		for (int i = 0; i < numRenderObjects; i++)
+		{
+			m_deviceResources->PIXBeginEvent(L"Draw Model");
+			const XMVECTORF32 scale =
+	        {
+				m_displayList[i].m_scale.x,
+				m_displayList[i].m_scale.y,
+				m_displayList[i].m_scale.z
+	        };
 
-	//RENDER OBJECTS FROM SCENEGRAPH
-    const int numRenderObjects = m_displayList.size();
-	for (int i = 0; i < numRenderObjects; i++)
-	{
-		m_deviceResources->PIXBeginEvent(L"Draw Model");
-		const XMVECTORF32 scale =
-        {
-			m_displayList[i].m_scale.x,
-			m_displayList[i].m_scale.y,
-			m_displayList[i].m_scale.z
-        };
+			const XMVECTORF32 translate =
+	        {
+				m_displayList[i].m_position.x,
+				m_displayList[i].m_position.y,
+				m_displayList[i].m_position.z
+	        };
 
-		const XMVECTORF32 translate =
-        {
-			m_displayList[i].m_position.x,
-			m_displayList[i].m_position.y,
-			m_displayList[i].m_position.z
-        };
+			//Convert degrees into radians for rotation matrix
+			const XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll
+			(
+	            m_displayList[i].m_orientation.y * PI_SHORT / 180,
+	            m_displayList[i].m_orientation.x * PI_SHORT / 180,
+	            m_displayList[i].m_orientation.z * PI_SHORT / 180
+	        );
 
-		//Convert degrees into radians for rotation matrix
-		const XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll
-		(
-            m_displayList[i].m_orientation.y * PI_SHORT / 180,
-            m_displayList[i].m_orientation.x * PI_SHORT / 180,
-            m_displayList[i].m_orientation.z * PI_SHORT / 180
-        );
+			const XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
 
-		const XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
+			//Last variable in draw - make last boolean TRUE for wireframe mode
+			m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);
 
-		//Last variable in draw - make last boolean TRUE for wireframe mode
-		m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);
-
-		m_deviceResources->PIXEndEvent();
-	}//End for
+			m_deviceResources->PIXEndEvent();
+		}//End for
     m_deviceResources->PIXEndEvent();
 
 	//RENDER TERRAIN
@@ -458,6 +447,19 @@ void Game::Render()
 	//Render the batch
 	//This is handled in the display chunk becuase it has the potential to get complex
 	m_displayChunk.RenderBatch(m_deviceResources);
+
+    m_deviceResources->PIXBeginEvent(L"HUD");
+	    //CAMERA POSITION ON HUD
+		m_sprites->Begin();
+		    const std::wstring cameraPositionText =
+		        L"Cam X: " + std::to_wstring(m_camera->m_camPosition.x) +
+		        L"            " +
+		        L"Cam Y: " + std::to_wstring(m_camera->m_camPosition.y) +
+		        L"            " +
+		        L"Cam Z: " + std::to_wstring(m_camera->m_camPosition.z);
+			m_font->DrawString(m_sprites.get(), cameraPositionText.c_str() , XMFLOAT2(100, 10), Colors::White);
+		m_sprites->End();
+    m_deviceResources->PIXEndEvent();
 
     m_deviceResources->Present();
 }//End Render
