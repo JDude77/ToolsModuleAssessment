@@ -170,7 +170,7 @@
     <ClInclude Include="Tool\Commands\MoveObjectCommand.h">
       <Filter>Tool\Header\Commands</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
+	<ClInclude Include="Resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

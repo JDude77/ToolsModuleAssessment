@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Win32SimpleSample.rc
+// Used by C:\Users\Jordan.Oaksydix\Desktop\ToolsAssessment\WOFFCEdit\Win32SimpleSample.rc
 //
 #define IDR_MENU1                       101
 #define IDR_TOOLBAR1                    102
