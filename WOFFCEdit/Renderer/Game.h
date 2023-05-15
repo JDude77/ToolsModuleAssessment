@@ -56,6 +56,7 @@ public:
 	int MousePicking() const;
 	void MoveSelectedObject(int selectedID);
 	void HighlightSelectedObject(int previousSelectedID, int newSelectedID) const;
+	void MoveSelectedObjectStart(int& selectedID) const;
 	void MoveSelectedObjectEnd(int& selectedID, int movedObjectID);
 	void Delete(int& selectedID);
 	void Copy(int selectedID);
@@ -72,7 +73,6 @@ public:
 
 private:
 	void Update(DX::StepTimer const& timer);
-
 
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();

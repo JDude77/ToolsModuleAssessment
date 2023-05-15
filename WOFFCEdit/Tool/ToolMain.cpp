@@ -28,6 +28,8 @@ ToolMain::ToolMain()
 	m_toolInputCommands.paste					= false;
 	m_toolInputCommands.deleteObject			= false;
 	m_toolInputCommands.increaseMoveSpeed		= false;
+	m_toolInputCommands.save					= false;
+	m_toolInputCommands.wireframeMode			= false;
 	m_toolInputCommands.mouseX					= 0.0f;
 	m_toolInputCommands.mouseY					= 0.0f;
 }//End default constructor
@@ -336,7 +338,7 @@ void ToolMain::Tick(MSG *msg, const bool selectWindowOpen, const int selectWindo
 		if(!selectWindowOpen && m_toolInputCommands.mousePickingActive)
 		{
 			m_executeOnce = true;
-			m_selectedObject = m_d3dRenderer.MousePicking();
+			m_d3dRenderer.MoveSelectedObjectStart(m_selectedObject);
 			m_toolInputCommands.mousePickingActive = false;
 		}//End if
 
@@ -375,8 +377,35 @@ void ToolMain::Tick(MSG *msg, const bool selectWindowOpen, const int selectWindo
 			m_executeOnce = true;
 			m_d3dRenderer.Redo(m_selectedObject, m_selectedObject);
 		}//End if
+
+		if(m_toolInputCommands.save)
+		{
+			m_executeOnce = true;
+			m_toolInputCommands.save = false;
+			onActionSave();
+			//Due to the separate window opening, need to manually disable both keys
+			m_keyArray[VK_CONTROL] = false;
+			m_keyArray['S'] = false;
+		}//End if
+
+		if(m_toolInputCommands.wireframeMode)
+		{
+			m_executeOnce = true;
+			m_d3dRenderer.ToggleWireframe();
+		}//End if
 	}//End if
-	else if(!(m_toolInputCommands.redo || m_toolInputCommands.undo || m_toolInputCommands.paste || m_toolInputCommands.copy || m_toolInputCommands.cut || m_toolInputCommands.deleteObject || m_toolInputCommands.mousePickingActive))
+
+	//There is definitely a better way to do this, but this works, so it's staying for now
+	else if
+	(!(	m_toolInputCommands.redo				||
+		m_toolInputCommands.undo				||
+		m_toolInputCommands.paste				||
+		m_toolInputCommands.copy				||
+		m_toolInputCommands.cut					|| 
+		m_toolInputCommands.deleteObject		||
+		m_toolInputCommands.mousePickingActive	||
+		m_toolInputCommands.save				||
+		m_toolInputCommands.wireframeMode))
 	{
 		m_executeOnce = false;
 	}//End else if
@@ -454,18 +483,25 @@ void ToolMain::UpdateInput(const MSG* msg)
 	m_toolInputCommands.redo = m_keyArray[VK_CONTROL] && m_keyArray['Y'] ? true : false;
 
 	//Delete command
-	m_toolInputCommands.deleteObject = m_keyArray[VK_DELETE] ? true : false;
+	m_toolInputCommands.deleteObject =	m_keyArray[VK_DELETE] ? true : false;
 
-	//Control commands
+	//Copy/cut/paste commands
 	m_toolInputCommands.copy =		m_keyArray[VK_CONTROL] && m_keyArray['C'] ? true : false;
 	m_toolInputCommands.cut =		m_keyArray[VK_CONTROL] && m_keyArray['X'] ? true : false;
 	m_toolInputCommands.paste =		m_keyArray[VK_CONTROL] && m_keyArray['V'] ? true : false;
 
-	//WASD movement
-	m_toolInputCommands.forward =	m_keyArray['W'] ? true : false;
-	m_toolInputCommands.back =		m_keyArray['S'] ? true : false;
-	m_toolInputCommands.left =		m_keyArray['A'] ? true : false;
-	m_toolInputCommands.right =		m_keyArray['D'] ? true : false;
+	//MFC interface keyboard commands
+	m_toolInputCommands.save =			m_keyArray[VK_CONTROL] && m_keyArray['S'] ? true : false;
+	m_toolInputCommands.wireframeMode = m_keyArray['1'] || m_keyArray[VK_NUMPAD1] ? true : false;
+
+	//WASD movement (disabled when holding control)
+	if(!m_keyArray[VK_CONTROL])
+	{
+		m_toolInputCommands.forward =	m_keyArray['W'] ? true : false;
+		m_toolInputCommands.back =	    m_keyArray['S'] ? true : false;
+		m_toolInputCommands.left =		m_keyArray['A'] ? true : false;
+		m_toolInputCommands.right =		m_keyArray['D'] ? true : false;
+	}//End if
 
 	//Rotation
 	m_toolInputCommands.rotRight =	m_keyArray['E'] ? true : false;

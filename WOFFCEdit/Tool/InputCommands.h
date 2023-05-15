@@ -32,4 +32,8 @@ struct InputCommands
 	//Undo/redo
 	bool undo;
 	bool redo;
+
+	//Keyboard shortcuts for MFC buttons
+	bool save;
+	bool wireframeMode;
 };

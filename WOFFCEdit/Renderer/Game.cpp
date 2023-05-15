@@ -116,6 +116,7 @@ int Game::MousePicking() const
 
 	static int selectedID = -1;
 	const int previousIDCache = selectedID;
+	selectedID = -1;
 	float pickingDistance = 0.0f;
 	float shortestDistance = D3D11_FLOAT32_MAX;
 
@@ -327,6 +328,11 @@ void Game::HighlightSelectedObject(const int previousSelectedID, const int newSe
 			});//End UpdateEffects lambda
 	}//End if
 }//End HighlightSelectedObject
+
+void Game::MoveSelectedObjectStart(int& selectedID) const
+{
+	selectedID = MousePicking();
+}//End MoveSelectedObjectStart
 
 void Game::MoveSelectedObject(const int selectedID)
 {
