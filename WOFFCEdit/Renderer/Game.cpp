@@ -318,7 +318,7 @@ void Game::HighlightSelectedObject(const int previousSelectedID, const int newSe
 	}//End if
 
 	//If we changed from a previous ID
-	if (previousSelectedID != -1)
+	if (previousSelectedID != -1 && previousSelectedID < m_displayList.size())
 	{
 		//Change the previous model's highlight back to normal
 		m_displayList[previousSelectedID].m_model->UpdateEffects([](IEffect* objectEffect)
